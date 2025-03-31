@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Slider } from '../ui/slider';
 import { Switch } from '../ui/switch';
 import { Textarea } from '../ui/textarea';
+import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 
 type SystemConfig = {
   apiEndpoint: string;
@@ -19,6 +20,7 @@ type SystemConfig = {
 
 export function SystemSettings() {
   const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [config, setConfig] = useState<SystemConfig>({
     apiEndpoint: 'https://api.mission-control.gov/v2',
     refreshRate: 5,
@@ -29,6 +31,29 @@ export function SystemSettings() {
     notificationEmail: 'sysadmin@mission-control.gov',
     systemMessage: 'Welcome to Mission Control System v2.1.5',
   });
+
+  // Fetch current settings when component mounts
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const response = await fetch('/api/system/settings');
+        if (response.ok) {
+          const data = await response.json();
+          // Merge API settings with our default config 
+          // (only maintenanceMode and debugMode come from API in this demo)
+          setConfig(prevConfig => ({
+            ...prevConfig,
+            maintenanceMode: data.maintenanceMode,
+            debugMode: data.debugMode
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch system settings:", error);
+      }
+    }
+    
+    fetchSettings();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -41,22 +66,62 @@ export function SystemSettings() {
 
   const handleSwitchChange = (name: keyof SystemConfig, checked: boolean) => {
     setConfig({ ...config, [name]: checked });
+    
+    // For maintenance mode and debug mode, update the API immediately
+    if (name === 'maintenanceMode' || name === 'debugMode') {
+      updateSystemSettingsAPI({
+        [name]: checked
+      });
+    }
+  };
+
+  // Function to update the system settings via API
+  const updateSystemSettingsAPI = async (settings: Partial<SystemConfig>) => {
+    setIsLoading(true);
+    setMessage(null);
+    
+    try {
+      const response = await fetch('/api/system/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setMessage({ type: 'success', text: data.message || 'Settings updated successfully' });
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Failed to update settings' });
+      }
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      setMessage({ type: 'error', text: 'An error occurred while updating settings' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSaveSettings = async () => {
-    setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // In a real app, this would send data to an API
-    console.log('Saving system settings:', config);
-    
-    setIsLoading(false);
+    // For the demo, we're only persisting maintenance mode and debug mode
+    // In a real app, you would send all the settings
+    updateSystemSettingsAPI({
+      maintenanceMode: config.maintenanceMode,
+      debugMode: config.debugMode
+    });
   };
 
   return (
     <div className="p-6 space-y-8">
+      {message && (
+        <Alert variant={message.type === 'success' ? 'default' : 'destructive'} className="mb-6">
+          <AlertTitle>{message.type === 'success' ? 'Success' : 'Error'}</AlertTitle>
+          <AlertDescription>{message.text}</AlertDescription>
+        </Alert>
+      )}
+    
       <div>
         <h2 className="text-lg font-semibold mb-6">System Configuration</h2>
         <div className="space-y-6">
@@ -169,6 +234,11 @@ export function SystemSettings() {
               <p className="text-xs text-[#a3a3a3]">
                 Restricts access to admin users only
               </p>
+              {config.maintenanceMode && (
+                <p className="text-xs text-[#ff6b00] mt-1 font-medium">
+                  Warning: Regular users are redirected to maintenance page
+                </p>
+              )}
             </div>
             <Switch
               id="maintenanceMode"
@@ -183,6 +253,11 @@ export function SystemSettings() {
               <p className="text-xs text-[#a3a3a3]">
                 Enables verbose logging and debugging tools
               </p>
+              {config.debugMode && (
+                <p className="text-xs text-[#ff6b00] mt-1 font-medium">
+                  Active: Debug information is visible in console and network
+                </p>
+              )}
             </div>
             <Switch
               id="debugMode"

@@ -83,7 +83,7 @@ export function ConsentScreen({ onAccept, onDecline }: ConsentScreenProps) {
             <Button 
               onClick={handleAccept}
               variant="default" 
-              className="sm:flex-1 bg-[#00e5c7] hover:bg-[#00ccb3] text-[#050505] border-none uppercase font-medium tracking-wide"
+              className="sm:flex-1 bg-[#00e586] hover:bg-[#00cc55] text-[#050505] border-none uppercase font-medium tracking-wide"
               isLoading={isLoading}
             >
               Accept

@@ -39,7 +39,9 @@ export default function LoginPage() {
           <LoginForm />
         </div>
       </div>
-      <ClassificationBanner level="confidential" />
+      <footer className="mt-auto fixed bottom-0 w-full">
+        <ClassificationBanner level="confidential" />
+      </footer>
     </div>
   );
 } 

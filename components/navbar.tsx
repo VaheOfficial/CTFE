@@ -7,9 +7,10 @@ import { UserDropdown } from './user-dropdown';
 
 interface NavbarProps {
   isLoggedIn?: boolean;
+  isAdmin?: boolean;
 }
 
-export function Navbar({ isLoggedIn = false }: NavbarProps) {
+export function Navbar({ isLoggedIn = false, isAdmin = false }: NavbarProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const toggleDropdown = () => {
@@ -47,12 +48,14 @@ export function Navbar({ isLoggedIn = false }: NavbarProps) {
 
         {isLoggedIn && (
           <div className="flex items-center gap-5">
-            <Link 
-              href="/admin" 
+            {isAdmin && (
+              <Link 
+                href="/admin" 
               className="text-sm text-[#a3a3a3] hover:text-[#f5f5f5] transition-colors"
             >
-              Admin Panel
-            </Link>
+                Admin Panel
+              </Link>
+            )}
             <div className="relative">
               <button
                 type="button"
@@ -77,7 +80,7 @@ export function Navbar({ isLoggedIn = false }: NavbarProps) {
                   <circle cx="12" cy="7" r="4" />
                 </svg>
               </button>
-              <UserDropdown isOpen={isDropdownOpen} onClose={closeDropdown} />
+              <UserDropdown isOpen={isDropdownOpen} onClose={closeDropdown} isAdmin={isAdmin} />
             </div>
           </div>
         )}

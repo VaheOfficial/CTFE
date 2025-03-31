@@ -30,7 +30,7 @@ export function AdminPanel() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* Admin warning message */}
       <div className="bg-[#ff2d55]/10 border border-[#ff2d55]/30 rounded-lg p-4 mb-6">
         <div className="flex items-start gap-3">

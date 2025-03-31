@@ -257,7 +257,7 @@ export default function SettingsPage() {
       </main>
       
       <footer className="mt-auto fixed bottom-0 w-full">
-        <ClassificationBanner level="top-secret" />
+        <ClassificationBanner level="confidential" />
       </footer>
     </div>
   );

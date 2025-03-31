@@ -86,8 +86,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#050505] text-[#f5f5f5]">
       <ClassificationBanner level="unclassified" />
-      <Navbar isLoggedIn={true} />
-      <main className="container mx-auto px-4 py-8">
+      <Navbar isLoggedIn={true} isAdmin={true} />
+      <main className="container mx-auto px-4 py-8 pb-12">
         <DashboardHeader {...launchpadData} />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
@@ -104,7 +104,9 @@ export default function Dashboard() {
           <RadioCommunications messages={radioMessages} isLive={true} />
         </div>
       </main>
-      <ClassificationBanner level="confidential" />
+      <footer className="mt-auto fixed bottom-0 w-full">
+        <ClassificationBanner level="unclassified" />
+      </footer>
     </div>
   );
 } 

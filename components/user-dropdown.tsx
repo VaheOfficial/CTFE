@@ -4,9 +4,10 @@ import Link from 'next/link';
 interface UserDropdownProps {
   isOpen: boolean;
   onClose: () => void;
+  isAdmin?: boolean;
 }
 
-export function UserDropdown({ isOpen, onClose }: UserDropdownProps) {
+export function UserDropdown({ isOpen, onClose, isAdmin = false }: UserDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,12 +54,14 @@ export function UserDropdown({ isOpen, onClose }: UserDropdownProps) {
         >
           Settings
         </Link>
-        <Link 
-          href="/admin" 
-          className="block px-4 py-2 text-sm text-[#e0e0e0] hover:bg-[#1a1a1a] transition-colors"
+        {isAdmin && (
+          <Link 
+            href="/admin" 
+            className="block px-4 py-2 text-sm text-[#e0e0e0] hover:bg-[#1a1a1a] transition-colors"
         >
           Admin Panel
         </Link>
+        )}
       </div>
       
       <div className="border-t border-[#1a1a1a] py-1">

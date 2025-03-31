@@ -60,7 +60,10 @@ export function LoginForm() {
                 type="checkbox"
                 className="h-4 w-4 rounded border-[#1a1a1a] bg-[#0a0a0a] text-[#00e5c7] focus:ring-[#00e5c7] focus:ring-offset-[#0a0a0a]"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-[#a3a3a3]">
+              <label 
+                htmlFor="remember-me" 
+                className="ml-2 block text-sm text-[#a3a3a3] hover:text-[#f5f5f5]"
+              >
                 Remember me
               </label>
             </div>
