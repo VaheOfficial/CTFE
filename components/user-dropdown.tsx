@@ -1,5 +1,8 @@
+'use client';
+
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { Avatar } from './ui/avatar';
 
 interface UserDropdownProps {
   isOpen: boolean;
@@ -9,6 +12,13 @@ interface UserDropdownProps {
 
 export function UserDropdown({ isOpen, onClose, isAdmin = false }: UserDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // User data - in a real app would come from authentication context or props
+  const user = {
+    name: "John Doe",
+    email: "john.doe@agency.gov",
+    role: isAdmin ? "Administrator" : "Operator"
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -31,13 +41,18 @@ export function UserDropdown({ isOpen, onClose, isAdmin = false }: UserDropdownP
   return (
     <div 
       ref={dropdownRef}
-      className="absolute top-14 right-4 w-56 rounded-md border border-[#1a1a1a] bg-[#0a0a0a] shadow-lg z-50"
+      className="absolute top-14 right-0 w-56 rounded-md border border-[#1a1a1a] bg-[#0a0a0a] shadow-lg z-50"
     >
       <div className="py-3 px-4 border-b border-[#1a1a1a]">
-        <div className="text-sm font-medium text-[#f5f5f5]">John Doe</div>
-        <div className="text-xs text-[#a3a3a3]">john.doe@agency.gov</div>
+        <div className="flex items-center gap-3">
+          <Avatar name={user.name} size="sm" />
+          <div>
+            <div className="text-sm font-medium text-[#f5f5f5]">{user.name}</div>
+            <div className="text-xs text-[#a3a3a3]">{user.email}</div>
+          </div>
+        </div>
         <div className="mt-1.5 text-[0.65rem] px-1.5 py-0.5 bg-[#ff6b00]/20 text-[#ff6b00] rounded-sm inline-block">
-          OPERATOR
+          {user.role.toUpperCase()}
         </div>
       </div>
       
@@ -58,9 +73,9 @@ export function UserDropdown({ isOpen, onClose, isAdmin = false }: UserDropdownP
           <Link 
             href="/admin" 
             className="block px-4 py-2 text-sm text-[#e0e0e0] hover:bg-[#1a1a1a] transition-colors"
-        >
-          Admin Panel
-        </Link>
+          >
+            Admin Panel
+          </Link>
         )}
       </div>
       

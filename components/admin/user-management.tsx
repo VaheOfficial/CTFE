@@ -3,6 +3,7 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
+import { PasswordResetModal } from './password-reset-modal';
 
 type User = {
   id: string;
@@ -11,6 +12,33 @@ type User = {
   role: 'admin' | 'operator' | 'viewer';
   status: 'active' | 'suspended' | 'pending';
   lastLogin: string;
+};
+
+// Function to generate a strong password
+const generateStrongPassword = () => {
+  const uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const lowercase = 'abcdefghijkmnopqrstuvwxyz';
+  const numbers = '23456789';
+  const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+  
+  let password = '';
+  
+  // Ensure at least one of each character type
+  password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+  password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+  password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  password += symbols.charAt(Math.floor(Math.random() * symbols.length));
+  
+  // Add additional random characters to reach desired length (12-16 chars)
+  const length = Math.floor(Math.random() * 5) + 12; // Length between 12-16
+  const allChars = uppercase + lowercase + numbers + symbols;
+  
+  for (let i = password.length; i < length; i++) {
+    password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+  }
+  
+  // Shuffle the password
+  return password.split('').sort(() => 0.5 - Math.random()).join('');
 };
 
 export function UserManagement() {
@@ -53,6 +81,9 @@ export function UserManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Partial<User>>({});
+  
+  // Password reset state
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   const filteredUsers = users.filter(
     (user) =>
@@ -94,6 +125,14 @@ export function UserManagement() {
   const handleStatusToggle = (status: 'active' | 'suspended') => {
     setEditForm({ ...editForm, status });
   };
+  
+  const handleOpenResetModal = () => {
+    setIsResetModalOpen(true);
+  };
+  
+  const handleCloseResetModal = () => {
+    setIsResetModalOpen(false);
+  };
 
   const statusColor = {
     active: 'text-green-500',
@@ -127,9 +166,9 @@ export function UserManagement() {
             className="bg-[#121212] border-[#2a2a2a]"
           />
         </div>
-        <div className="space-y-2 max-h-[500px] overflow-y-auto">
+        <ul className="space-y-2 max-h-[500px] overflow-y-auto">
           {filteredUsers.map((user) => (
-            <div
+            <li
               key={user.id}
               className={`p-3 rounded cursor-pointer ${
                 selectedUser?.id === user.id
@@ -139,7 +178,6 @@ export function UserManagement() {
               onClick={() => handleSelectUser(user)}
               onKeyDown={(e) => handleKeyPress(e, user)}
               tabIndex={0}
-              role="button"
               aria-selected={selectedUser?.id === user.id}
             >
               <div className="font-medium">{user.name}</div>
@@ -154,9 +192,9 @@ export function UserManagement() {
                   {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
                 </span>
               </div>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
       {/* User details */}
@@ -166,14 +204,24 @@ export function UserManagement() {
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-medium">User Details</h3>
               {!isEditing ? (
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  onClick={handleEditUser} 
-                  className="text-sm"
-                >
-                  Edit User
-                </Button>
+                <div className="space-x-2">
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={handleEditUser} 
+                    className="text-sm"
+                  >
+                    Edit User
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleOpenResetModal}
+                    className="text-sm bg-[#ff2d55] hover:bg-[#ff2d55]/80 text-white"
+                  >
+                    Reset Password
+                  </Button>
+                </div>
               ) : (
                 <div className="space-x-2">
                   <Button 
@@ -260,58 +308,50 @@ export function UserManagement() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-sm text-[#a3a3a3]">Name</p>
-                    <p className="font-medium">{selectedUser.name}</p>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="p-3 bg-[#121212] rounded-md">
+                    <div className="text-sm text-[#a3a3a3]">Name</div>
+                    <div className="font-medium">{selectedUser.name}</div>
                   </div>
-                  <div>
-                    <p className="text-sm text-[#a3a3a3]">Email</p>
-                    <p className="font-medium">{selectedUser.email}</p>
+                  <div className="p-3 bg-[#121212] rounded-md">
+                    <div className="text-sm text-[#a3a3a3]">Email</div>
+                    <div className="font-medium">{selectedUser.email}</div>
                   </div>
-                  <div>
-                    <p className="text-sm text-[#a3a3a3]">Role</p>
-                    <p className="font-medium capitalize">{selectedUser.role}</p>
+                  <div className="p-3 bg-[#121212] rounded-md">
+                    <div className="text-sm text-[#a3a3a3]">Role</div>
+                    <div>
+                      <span className={`text-xs px-2 py-1 rounded-full ${roleColor[selectedUser.role]}`}>
+                        {selectedUser.role.toUpperCase()}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-[#a3a3a3]">Status</p>
-                    <p className={`font-medium ${statusColor[selectedUser.status]}`}>
+                  <div className="p-3 bg-[#121212] rounded-md">
+                    <div className="text-sm text-[#a3a3a3]">Status</div>
+                    <div className={`font-medium ${statusColor[selectedUser.status]}`}>
                       {selectedUser.status.charAt(0).toUpperCase() + selectedUser.status.slice(1)}
-                    </p>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <p className="text-sm text-[#a3a3a3]">Last Login</p>
-                  <p className="font-medium">{selectedUser.lastLogin}</p>
-                </div>
-                <div className="mt-6 pt-6 border-t border-[#1a1a1a]">
-                  <h4 className="text-sm font-medium mb-3">Security Actions</h4>
-                  <div className="flex space-x-3">
-                    <Button 
-                      type="button"
-                      variant="outline" 
-                      className="text-sm"
-                    >
-                      Reset Password
-                    </Button>
-                    <Button 
-                      type="button"
-                      variant="outline" 
-                      className={`text-sm ${selectedUser.status === 'suspended' ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' : 'bg-[#ff2d55]/10 text-[#ff2d55] hover:bg-[#ff2d55]/20'}`}
-                    >
-                      {selectedUser.status === 'suspended' ? 'Reactivate Account' : 'Suspend Account'}
-                    </Button>
-                  </div>
+                <div className="p-3 bg-[#121212] rounded-md">
+                  <div className="text-sm text-[#a3a3a3]">Last Login</div>
+                  <div className="font-medium">{selectedUser.lastLogin}</div>
                 </div>
               </div>
             )}
           </div>
         ) : (
-          <div className="h-full flex items-center justify-center text-[#a3a3a3]">
-            <p>Select a user to view details</p>
+          <div className="flex items-center justify-center h-full text-[#a3a3a3]">
+            Select a user to view details
           </div>
         )}
       </div>
+      
+      {/* Password Reset Modal */}
+      <PasswordResetModal
+        user={selectedUser}
+        isOpen={isResetModalOpen}
+        onClose={handleCloseResetModal}
+      />
     </div>
   );
 } 

@@ -4,8 +4,8 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 
-// List of authorized IPs that can perform destructive actions
-const AUTHORIZED_IPS = ['192.168.1.10', '10.0.0.5', '172.16.254.1'];
+// List of authorized IPs that can perform destructive actions - restricting to local machine only
+const AUTHORIZED_IPS = ['127.0.0.1', 'localhost'];
 
 interface CommandCenterProps {
   clientIP: string;

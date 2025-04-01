@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { UserDropdown } from './user-dropdown';
+import { Avatar } from './ui/avatar';
 
 interface NavbarProps {
   isLoggedIn?: boolean;
@@ -19,6 +19,13 @@ export function Navbar({ isLoggedIn = false, isAdmin = false }: NavbarProps) {
 
   const closeDropdown = () => {
     setIsDropdownOpen(false);
+  };
+
+  // User data - in a real app would come from authentication context
+  const user = {
+    name: "John Doe",
+    email: "john.doe@agency.gov",
+    role: isAdmin ? "Administrator" : "Operator"
   };
 
   return (
@@ -60,25 +67,11 @@ export function Navbar({ isLoggedIn = false, isAdmin = false }: NavbarProps) {
               <button
                 type="button"
                 onClick={toggleDropdown}
-                className="w-9 h-9 rounded-full bg-[#1a1a1a] border border-[#252525] hover:border-[#333333] transition-all flex items-center justify-center text-[#a3a3a3] hover:text-[#f5f5f5]"
+                className="hover:border-[#333333] transition-all flex items-center justify-center text-[#a3a3a3] hover:text-[#f5f5f5]"
                 aria-expanded={isDropdownOpen}
                 aria-haspopup="true"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-5 h-5"
-                  aria-labelledby="user-icon"
-                >
-                  <title id="user-icon">User profile</title>
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
+                <Avatar name={user.name} size="sm" />
               </button>
               <UserDropdown isOpen={isDropdownOpen} onClose={closeDropdown} isAdmin={isAdmin} />
             </div>

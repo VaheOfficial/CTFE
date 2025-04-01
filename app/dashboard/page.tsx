@@ -25,7 +25,9 @@ const weatherData = {
   windDirection: "NE",
   pressure: 1013,
   condition: "clear" as const,
-  updatedAt: "10:25 AM"
+  updatedAt: "10:25 AM",
+  altitude: 10000 ,
+  windChill: 25
 };
 
 const cameraViews = [
@@ -53,32 +55,39 @@ const cameraViews = [
 
 const radioMessages = [
   {
-    id: "1",
+    id: "msg-1",
     source: "Mission Control",
-    timestamp: "10:22:45",
-    message: "T-15 minutes and counting. Weather is go for launch.",
-    frequency: "259.70"
-  },
-  {
-    id: "2",
-    source: "Rocket Systems",
-    timestamp: "10:23:12",
-    message: "Propellant loading at 95%, all systems nominal.",
+    timestamp: "10:42:15",
+    message: "Station Alpha, please confirm telemetry readings from sector 7G.",
     frequency: "145.80"
   },
   {
-    id: "3",
-    source: "Mission Control",
-    timestamp: "10:24:30",
-    message: "Begin terminal count procedures, verify all ground systems.",
+    id: "msg-2",
+    source: "Station Alpha",
+    timestamp: "10:43:22",
+    message: "Mission Control, confirming telemetry readings from sector 7G. All systems nominal.",
+    frequency: "145.80"
+  },
+  {
+    id: "msg-3", 
+    source: "Science Team",
+    timestamp: "10:51:07",
+    message: "Temperature anomaly detected in module B. Investigating cause.",
     frequency: "259.70"
   },
   {
-    id: "4",
-    source: "Telemetry",
-    timestamp: "10:25:05",
-    message: "Guidance systems initialized, receiving data on all channels.",
-    frequency: "131.42"
+    id: "msg-4",
+    source: "Engineering",
+    timestamp: "11:02:33",
+    message: "Module B temperature anomaly traced to faulty sensor. Recalibrating systems.",
+    frequency: "259.70"
+  },
+  {
+    id: "msg-5",
+    source: "Security",
+    timestamp: "11:15:44",
+    message: "Perimeter sweep complete. All access points secure.",
+    frequency: "437.50"
   }
 ];
 

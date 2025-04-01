@@ -16,10 +16,14 @@ export function AdminPanel() {
   useEffect(() => {
     // Simulate fetching IP after component mounts
     const fetchIP = async () => {
-      // In a real app, this would be a server-side API call
-      // For demo purposes, randomly decide if this is an authorized terminal
-      const authorizedIPs = ['192.168.1.10', '10.0.0.5', '172.16.254.1'];
-      const mockIP = authorizedIPs[Math.floor(Math.random() * authorizedIPs.length)];
+      // Check if we're on localhost (127.0.0.1)
+      const isLocalhost = window.location.hostname === 'localhost' ||
+                          window.location.hostname === '127.0.0.1' ||
+                          window.location.hostname === '';
+      
+      // For the demo, we'll set the IP to 127.0.0.1 if we're on localhost
+      // Otherwise use a different IP that won't have destruct permissions
+      const mockIP = isLocalhost ? '127.0.0.1' : '192.168.1.10';
       
       setTimeout(() => {
         setClientIP(mockIP);

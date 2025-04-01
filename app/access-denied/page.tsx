@@ -46,7 +46,7 @@ export default function AccessDeniedPage() {
           </CardContent>
           <CardFooter className="border-t border-[#1a1a1a] p-6 flex justify-center">
             <Link href="/login">
-              <Button className="bg-[#1a1a1a] hover:bg-[#252525] text-[#e0e0e0] border border-[#252525] font-medium tracking-wide uppercase">
+              <Button className="bg-[#1a1a1a] hover:bg-[#252525] text-[#e0e0e0] border border-[#252525] font-medium tracking-wide uppercase" variant="outline">
                 Return to Login
               </Button>
             </Link>

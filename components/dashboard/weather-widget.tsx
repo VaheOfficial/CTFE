@@ -8,6 +8,8 @@ interface WeatherData {
   windDirection: string;
   pressure: number;
   condition: 'clear' | 'cloudy' | 'rain' | 'storm' | 'snow';
+  altitude: number;
+  windChill: number;
   updatedAt: string;
 }
 
@@ -162,6 +164,17 @@ export function WeatherWidget({ data }: WeatherWidgetProps) {
                 {getWindDirectionArrow(data.windDirection)}
               </div>
             </div>
+
+            <div className="flex justify-between p-3 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
+              <span className="text-xs text-[#a3a3a3]">Altitude</span>
+              <span className="text-xs font-medium text-[#f5f5f5]">{data.altitude} m</span>
+            </div>
+
+            <div className="flex justify-between p-3 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
+              <span className="text-xs text-[#a3a3a3]">Wind Chill</span>
+              <span className="text-xs font-medium text-[#f5f5f5]">{data.windChill} °C</span>
+            </div>
+
           </div>
         </div>
       </CardContent>

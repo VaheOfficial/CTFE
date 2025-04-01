@@ -38,7 +38,7 @@ export function VideoPlayer({ sources }: VideoPlayerProps) {
           size="sm" 
           onClick={handleToggleFullscreen}
           aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-          className="text-[#a3a3a3] hover:text-[#f5f5f5] hover:bg-[#1a1a1a] rounded-lg h-8 w-8 p-0"
+          className="text-[#363535] hover:text-[#f5f5f5] hover:bg-[#1a1a1a] rounded-lg h-8 w-8"
         >
           {isFullscreen ? (
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">

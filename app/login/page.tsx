@@ -36,7 +36,7 @@ export default function LoginPage() {
               Internal Launch Monitoring System
             </p>
           </div>
-          <LoginForm />
+            <LoginForm />
         </div>
       </div>
       <footer className="mt-auto fixed bottom-0 w-full">

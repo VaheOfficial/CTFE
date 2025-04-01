@@ -65,7 +65,7 @@ export function ClassificationBanner({ level = 'confidential' }: ClassificationB
   };
 
   return (
-    <div className={`${getBannerColor()} py-1.5 px-4 text-center font-mono text-xs tracking-wider border-y border-y-2 sticky top-0 z-50 font-medium flex items-center justify-center`}>
+    <div className={`${getBannerColor()} py-1.5 px-4 text-center font-mono text-xs tracking-wider border-y border-y-2 sticky top-0 z-[1000] font-medium flex items-center justify-center`}>
       <div className="flex justify-center items-center space-x-8">
         <div className="flex items-center space-x-1.5">
           {getSecurityIcon()}

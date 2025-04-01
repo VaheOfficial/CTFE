@@ -24,7 +24,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-[#050505] text-[#f5f5f5]">
       <ClassificationBanner level="confidential" />
-      <Navbar isLoggedIn={true} />
+      <Navbar isLoggedIn={true} isAdmin={true} />
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
