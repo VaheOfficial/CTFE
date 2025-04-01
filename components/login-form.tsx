@@ -6,12 +6,14 @@ import Link from 'next/link';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter } from './ui/card';
-import { setToken, setRefreshToken, setIsAuthenticated, setError } from '../redux/authSlice';
+import { setToken, setRefreshToken, setIsAuthenticated, setError, setSession } from '../redux/authSlice';
 import { setUser } from '../redux/userSlice';
 import { useDispatch } from 'react-redux';
 import { ApiService } from '../lib/api.service';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { mcToken } from '../utils/constants';
+import Cookies from 'js-cookie';
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -36,9 +38,11 @@ export function LoginForm() {
         });
         return;
       }
-      
+      console.log(response.data);
       // Set the token in the Redux store
+      Cookies.set(mcToken, response.data.accessToken);
       dispatch(setToken(response.data.accessToken));
+      dispatch(setSession(response.data.sessionId));
       if (response.data.refreshToken) {
         dispatch(setRefreshToken(response.data.refreshToken));
       }

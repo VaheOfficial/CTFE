@@ -1,5 +1,5 @@
-import { store } from '../redux/store';
-
+import { mcToken } from "../utils/constants";
+import Cookies from 'js-cookie';
 export class ApiService {
     private readonly baseUrl: string;
 
@@ -8,10 +8,9 @@ export class ApiService {
     }
 
     private getHeaders() {
-        const authToken = store.getState().auth.token;
         return {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`,
+            'Authorization': `Bearer ${Cookies.get(mcToken)}`,
         };
     }
 
@@ -45,13 +44,20 @@ export class ApiService {
     }
 
     async me() {
-        const response = await this.request('/auth/me');
+        const response = await this.request('/auth/me', {
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
         return response.json();
     }
 
     async logout() {
         const response = await this.request('/auth/logout', {
             method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
         });
 
         if (!response.ok) {
@@ -61,4 +67,23 @@ export class ApiService {
 
         return response.json();
     }    
+
+    async changePassword(oldPassword: string, newPassword: string) {
+        const response = await this.request('/auth/change-password', {
+            method: 'POST',
+            body: JSON.stringify({ oldPassword, newPassword }),
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Password change failed',
+            }
+        }
+        return response.json();
+    }
 }

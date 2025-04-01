@@ -1,11 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
+import type { User } from '../types/user.type';
 
-export const initialState = {
+interface UserState {
+    user: User;
+    isLoading: boolean;
+    error: string | null;
+}
+
+export const initialState: UserState = {
     user: {
         name: null,
         email: null,
         role: null,
-        clearenceLevel: null,
+        clearanceLevel: null,
         accountStatus: null,
         lastActive: null,
         lastLogin: null,

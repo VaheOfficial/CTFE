@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Navbar } from '../../components/navbar';
 import { ClassificationBanner } from '../../components/classification-banner';
@@ -9,8 +9,19 @@ import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
 import { Switch } from '../../components/ui/switch';
+import { useRouter } from 'next/navigation';
+import { ApiService } from '../../lib/api.service';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser } from '../../redux/userSlice';
+import type { RootState } from '../../redux/store';
+import { PasswordChangeModal } from '../../components/user/password-change-modal';
 
 export default function SettingsPage() {
+  // Initialize router, dispatch, and apiService
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const apiService = React.useMemo(() => new ApiService(), []);
+
   // State for various settings
   const [activeTab, setActiveTab] = useState<'account' | 'notifications' | 'security'>('account');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -21,10 +32,23 @@ export default function SettingsPage() {
     email: 'john.doe@agency.gov'
   });
   
-  const [notificationSettings, setNotificationSettings] = useState({
-    systemNotifications: true,
-    emailNotifications: true
-  });
+  // Fetch user data from API if not already in Redux store
+  const user = useSelector((state: RootState) => state.user.user);
+  useEffect(() => {
+    if(user) {
+      return;
+    }
+    const fetchUser = async () => {
+      try {
+        const response = await apiService.me();
+        dispatch(setUser(response.data));
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+    fetchUser();
+  }, [dispatch, apiService, user]);
+  
 
   // Handler for account form changes
   const handleAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,14 +56,6 @@ export default function SettingsPage() {
     setAccountForm({ ...accountForm, [name]: value });
   };
   
-  // Handler for notification toggles
-  const handleNotificationToggle = (setting: keyof typeof notificationSettings) => {
-    setNotificationSettings({
-      ...notificationSettings,
-      [setting]: !notificationSettings[setting]
-    });
-  };
-
   // Handler for save button
   const handleSaveSettings = () => {
     setIsUpdating(true);
@@ -53,14 +69,20 @@ export default function SettingsPage() {
 
   // Handler for password change
   const handleChangePassword = () => {
-    // In a real app, this would open a modal or navigate to password change page
-    console.log('Change password clicked');
+    setIsPasswordModalOpen(true);
   };
+
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#050505] text-[#f5f5f5]">
       <ClassificationBanner level="confidential" />
       <Navbar isLoggedIn={true} />
+      
+      <PasswordChangeModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+      />
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
@@ -88,19 +110,6 @@ export default function SettingsPage() {
                     }
                   >
                     Account
-                  </NavButton>
-                  <NavButton 
-                    active={activeTab === 'notifications'} 
-                    onClick={() => setActiveTab('notifications')}
-                    icon={
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-labelledby="notifications-icon-title">
-                        <title id="notifications-icon-title">Notifications Settings Icon</title>
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                      </svg>
-                    }
-                  >
-                    Notifications
                   </NavButton>
                   <NavButton 
                     active={activeTab === 'security'} 
@@ -136,7 +145,7 @@ export default function SettingsPage() {
                       <Input
                         id="name"
                         name="name"
-                        value={accountForm.name}
+                        value={user?.name ?? 'Default User'}
                         onChange={handleAccountChange}
                         className="mt-1 bg-[#121212] border-[#2a2a2a]"
                       />
@@ -147,7 +156,7 @@ export default function SettingsPage() {
                         id="email"
                         name="email"
                         type="email"
-                        value={accountForm.email}
+                        value={user?.email ?? 'default@agency.gov'}
                         onChange={handleAccountChange}
                         className="mt-1 bg-[#121212] border-[#2a2a2a]"
                       />
@@ -166,43 +175,7 @@ export default function SettingsPage() {
                 </CardFooter>
               </Card>
             )}
-            
-            {/* Notification Settings */}
-            {activeTab === 'notifications' && (
-              <Card variant="bordered">
-                <CardHeader className="pb-3">
-                  <CardTitle>Notification Preferences</CardTitle>
-                  <CardDescription>Control what alerts you receive</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <ToggleItem 
-                      label="System Notifications" 
-                      description="Receive alerts about system events"
-                      checked={notificationSettings.systemNotifications}
-                      onChange={() => handleNotificationToggle('systemNotifications')}
-                    />
-                    <ToggleItem 
-                      label="Email Notifications" 
-                      description="Receive notifications via email"
-                      checked={notificationSettings.emailNotifications}
-                      onChange={() => handleNotificationToggle('emailNotifications')}
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-end border-t border-[#1a1a1a] py-4">
-                  <Button 
-                    type="button"
-                    onClick={handleSaveSettings}
-                    className="bg-[#ff6b00] hover:bg-[#ff6b00]/80 text-white"
-                    disabled={isUpdating}
-                  >
-                    {isUpdating ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            )}
-            
+                        
             {/* Security Settings */}
             {activeTab === 'security' && (
               <Card variant="bordered">
@@ -236,8 +209,8 @@ export default function SettingsPage() {
                     <div className="p-4 bg-[#121212] rounded-md border border-[#1a1a1a]">
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-sm font-medium text-[#f5f5f5]">2 Active Sessions</p>
-                          <p className="text-xs text-[#a3a3a3] mt-1">Windows PC, iPhone 13</p>
+                          <p className="text-sm font-medium text-[#f5f5f5]">{user?.activeSessions?.length ?? 0} Active Sessions</p>
+                          <p className="text-xs text-[#a3a3a3] mt-1">{user?.activeSessions?.map((session) => session.device).join(', ') ?? ''}</p>
                         </div>
                         <Button 
                           type="button"

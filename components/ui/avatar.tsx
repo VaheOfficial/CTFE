@@ -6,7 +6,7 @@ import { cn } from '../../lib/utils';
 interface AvatarProps {
   name: string;
   src?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   status?: 'online' | 'offline' | 'away' | 'busy';
   className?: string;
 }
@@ -27,6 +27,8 @@ export function Avatar({
     md: 'w-10 h-10 text-sm',
     lg: 'w-12 h-12 text-base',
     xl: 'w-16 h-16 text-lg',
+    '2xl': 'w-20 h-20 text-xl',
+    '3xl': 'w-24 h-24 text-2xl',
   };
   
   return (

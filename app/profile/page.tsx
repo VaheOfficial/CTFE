@@ -1,26 +1,42 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect } from 'react';
 import { Navbar } from '../../components/navbar';
 import { ClassificationBanner } from '../../components/classification-banner';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-
-// Mock user data - in a real app, this would come from authentication service
-const userData = {
-  name: "John Doe",
-  email: "john.doe@agency.gov",
-  role: "Operator",
-  joinDate: "April 12, 2022",
-  avatarUrl: "https://ui-avatars.com/api/?name=John+Doe&background=ff6b00&color=fff",
-  badge: "Level 3 Clearance",
-  stats: {
-    missionsParticipated: 14,
-    logEntries: 243,
-    commendations: 2,
-    lastActive: "Today at 10:25 AM"
-  }
-};
+import { ApiService } from '../../lib/api.service';
+import { setUser } from '../../redux/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import type { RootState } from '../../redux/store';
+import { Avatar } from '../../components/ui/avatar';
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  // Memoize the ApiService instance so it doesn't change on every render
+  const apiService = React.useMemo(() => new ApiService(), []);
+
+  // Fetch user data from API
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const me = await apiService.me();
+        dispatch(setUser(me.data));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchUser();
+  }, [dispatch, apiService]);
+  const activeSession = useSelector((state: RootState) => state.auth.session);
+  // Get user data from Redux store
+  const user = useSelector((state: RootState) => {
+    console.log(state.user.user);
+    return state.user.user;
+  });
+
   return (
     <div className="min-h-screen bg-[#050505] text-[#f5f5f5]">
       <ClassificationBanner level="confidential" />
@@ -40,23 +56,13 @@ export default function ProfilePage() {
             <Card variant="bordered" className="overflow-hidden">
               <CardHeader className="border-b border-[#1a1a1a] pb-6">
                 <div className="flex flex-col items-center">
-                  <div className="relative w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-[#ff6b00]">
-                    <img 
-                      src={userData.avatarUrl} 
-                      alt="Profile" 
-                      className="w-full h-full object-cover"
-                    />
-                    <button 
-                      type="button"
-                      className="absolute bottom-0 inset-x-0 bg-[#0a0a0a]/80 text-[#f5f5f5] text-xs py-1 hover:bg-[#0a0a0a] transition-colors"
-                    >
-                      Change
-                    </button>
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-[#ff6b00] items-center justify-center">
+                    <Avatar name={user?.name ?? 'Default User'} size="3xl" className='object-cover -translate-x-0.5' />
                   </div>
-                  <h2 className="text-xl font-semibold text-[#f5f5f5]">{userData.name}</h2>
-                  <p className="text-sm text-[#a3a3a3]">{userData.email}</p>
+                  <h2 className="text-xl font-semibold text-[#f5f5f5]">{user?.name ?? 'Default User'}</h2>
+                  <p className="text-sm text-[#a3a3a3]">{user?.email ?? 'default@agency.gov'}</p>
                   <div className="mt-2 px-2 py-1 bg-[#ff6b00]/20 text-[#ff6b00] text-xs font-medium rounded">
-                    {userData.role.toUpperCase()}
+                    {user?.role?.toUpperCase() ?? 'OPERATOR'}
                   </div>
                 </div>
               </CardHeader>
@@ -65,17 +71,22 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-sm text-[#a3a3a3] mb-1">Security Badge</h3>
-                    <p className="text-sm font-medium">{userData.badge}</p>
+                    <p className="text-sm font-medium">
+                      {user.clearanceLevel === 'level3' ? 'Level 3' : 
+                       user.clearanceLevel === 'level2' ? 'Level 2' : 
+                       user.clearanceLevel === 'level1' ? 'Level 1' : 
+                       user.clearanceLevel}
+                    </p>
                   </div>
                   
                   <div>
                     <h3 className="text-sm text-[#a3a3a3] mb-1">Member Since</h3>
-                    <p className="text-sm font-medium">{userData.joinDate}</p>
+                    <p className="text-sm font-medium">{new Date(user.createdAt as string ?? '').toLocaleString()}</p>
                   </div>
                   
                   <div>
                     <h3 className="text-sm text-[#a3a3a3] mb-1">Last Active</h3>
-                    <p className="text-sm font-medium">{userData.stats.lastActive}</p>
+                    <p className="text-sm font-medium">{new Date(user.lastActive as string ?? '').toLocaleString()}</p>
                   </div>
                   
                   <div className="pt-3 mt-3 border-t border-[#1a1a1a]">
@@ -83,6 +94,7 @@ export default function ProfilePage() {
                       type="button"
                       variant="outline" 
                       className="w-full text-sm"
+                      onClick={() => router.push('/settings')}
                     >
                       Edit Profile
                     </Button>
@@ -100,7 +112,7 @@ export default function ProfilePage() {
                 <Card variant="bordered" className="bg-[#121212]">
                   <CardContent className="p-4">
                     <h3 className="text-[#a3a3a3] text-sm mb-1">Missions</h3>
-                    <p className="text-2xl font-semibold text-[#f5f5f5]">{userData.stats.missionsParticipated}</p>
+                    <p className="text-2xl font-semibold text-[#f5f5f5]">{user.missionsParticipated?.length ?? 0}</p>
                     <p className="text-xs text-[#a3a3a3] mt-1">Total participated</p>
                   </CardContent>
                 </Card>
@@ -108,7 +120,7 @@ export default function ProfilePage() {
                 <Card variant="bordered" className="bg-[#121212]">
                   <CardContent className="p-4">
                     <h3 className="text-[#a3a3a3] text-sm mb-1">Log Entries</h3>
-                    <p className="text-2xl font-semibold text-[#f5f5f5]">{userData.stats.logEntries}</p>
+                    <p className="text-2xl font-semibold text-[#f5f5f5]">{user.logEntries?.length ?? 0}</p>
                     <p className="text-xs text-[#a3a3a3] mt-1">System records</p>
                   </CardContent>
                 </Card>
@@ -116,7 +128,7 @@ export default function ProfilePage() {
                 <Card variant="bordered" className="bg-[#121212]">
                   <CardContent className="p-4">
                     <h3 className="text-[#a3a3a3] text-sm mb-1">Commendations</h3>
-                    <p className="text-2xl font-semibold text-[#f5f5f5]">{userData.stats.commendations}</p>
+                    <p className="text-2xl font-semibold text-[#f5f5f5]">{user.commendations?.length ?? 0}</p>
                     <p className="text-xs text-[#a3a3a3] mt-1">Performance awards</p>
                   </CardContent>
                 </Card>
@@ -128,33 +140,18 @@ export default function ProfilePage() {
                   <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <div className="divide-y divide-[#1a1a1a]">
-                    <ActivityItem 
-                      action="Logged into dashboard" 
-                      timestamp="Today at 08:32 AM" 
-                      location="Houston Terminal 3"
-                    />
-                    <ActivityItem 
-                      action="Approved launch sequence" 
-                      timestamp="Yesterday at 16:45 PM" 
-                      location="Mission Control Room"
-                    />
-                    <ActivityItem 
-                      action="Submitted system maintenance report" 
-                      timestamp="June 12, 2023 at 14:20 PM" 
-                      location="Remote Access"
-                    />
-                    <ActivityItem 
-                      action="Updated communication protocols" 
-                      timestamp="June 10, 2023 at 11:05 AM" 
-                      location="Main Facility"
-                    />
-                    <ActivityItem 
-                      action="Completed security training" 
-                      timestamp="June 05, 2023 at 09:15 AM" 
-                      location="Training Center"
-                    />
-                  </div>
+                  {user.logEntries?.slice(Math.max(0, user.logEntries.length - 5), user.logEntries.length)
+                    .reverse()
+                    .map((logEntry) => (
+                    <div className="divide-y divide-[#1a1a1a]" key={logEntry._id}>
+                      <ActivityItem 
+                        action={logEntry.description as string ?? ''} 
+                        timestamp={new Date(logEntry.createdAt as string ?? '').toLocaleString()} 
+                        location={logEntry.location as string ?? ''}
+                        type={logEntry.type as 'information' | 'incident' | 'observation' | 'other' ?? 'information'}
+                      />
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
               
@@ -165,22 +162,17 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="divide-y divide-[#1a1a1a]">
-                    <SessionItem 
-                      device="Windows PC" 
-                      browser="Chrome 114" 
-                      ip="192.168.1.45" 
-                      location="Houston, TX" 
-                      lastActive="Current session" 
-                      isCurrentDevice={true}
-                    />
-                    <SessionItem 
-                      device="iPhone 13" 
-                      browser="Safari Mobile" 
-                      ip="172.16.254.1" 
-                      location="Houston, TX" 
-                      lastActive="2 hours ago" 
-                      isCurrentDevice={false}
-                    />
+                    {user.activeSessions?.map((session) => (
+                      <SessionItem 
+                        key={session._id}
+                        device={session.device ?? ''} 
+                        browser={session.browser ?? ''} 
+                        ip={session.ipAddress === "::1" ? "localhost" : session.ipAddress ?? ''} 
+                        location={session.location ?? ''} 
+                        lastActive={new Date(session.lastActive as string ?? '').toLocaleString()} 
+                        isCurrentDevice={session.sessionId === activeSession}
+                      />
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -197,16 +189,58 @@ export default function ProfilePage() {
 }
 
 // Helper components
-function ActivityItem({ action, timestamp, location }: { 
+function ActivityItem({ action, timestamp, location, type }: { 
   action: string; 
   timestamp: string;
   location: string;
+  type: 'information' | 'incident' | 'observation' | 'other';
 }) {
+  // Define styling based on log type
+  const getLogTypeStyles = () => {
+    switch (type) {
+      case 'information':
+        return {
+          borderColor: '#3b82f6', // blue
+          bgColor: 'bg-blue-500/20',
+          textColor: 'text-blue-400',
+          label: 'INFO'
+        };
+      case 'incident':
+        return {
+          borderColor: '#ef4444', // red
+          bgColor: 'bg-red-500/20',
+          textColor: 'text-red-400',
+          label: 'INCIDENT'
+        };
+      case 'observation':
+        return {
+          borderColor: '#eab308', // yellow
+          bgColor: 'bg-yellow-500/20',
+          textColor: 'text-yellow-400',
+          label: 'OBSERVATION'
+        };
+      case 'other':
+        return {
+          borderColor: '#a855f7', // purple
+          bgColor: 'bg-purple-500/20',
+          textColor: 'text-purple-400',
+          label: 'OTHER'
+        };
+    }
+  };
+
+  const styles = getLogTypeStyles();
+
   return (
-    <div className="py-3 px-6 hover:bg-[#0a0a0a] transition-colors">
+    <div className="py-3 px-6 hover:bg-[#0a0a0a] transition-colors" style={{ borderLeft: `3px solid ${styles.borderColor}` }}>
       <div className="flex justify-between items-start">
         <div>
-          <p className="text-sm font-medium text-[#f5f5f5]">{action}</p>
+          <div className="flex items-center gap-2 mb-1">
+            <span className={`px-1.5 py-0.5 text-[0.65rem] ${styles.bgColor} ${styles.textColor} rounded font-medium`}>
+              {styles.label}
+            </span>
+            <p className="text-sm font-medium text-[#f5f5f5]">{action}</p>
+          </div>
           <p className="text-xs text-[#a3a3a3] mt-1">
             {location}
           </p>

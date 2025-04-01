@@ -2,7 +2,7 @@ export interface User {
     name: string | null;
     email: string | null;
     role: string | null;
-    clearenceLevel: string | null;
+    clearanceLevel: string | null;
     accountStatus: string | null;
     lastActive: string | null;
     lastLogin: string | null;
