@@ -1,3 +1,5 @@
+import type { GlobalState } from "../types/global.types";
+import type { User } from "../types/user.type";
 import { mcToken } from "../utils/constants";
 import Cookies from 'js-cookie';
 export class ApiService {
@@ -113,4 +115,56 @@ export class ApiService {
         return response.json();
     }
 
+    async updateUser(id: string,user: Partial<User>) {
+        const response = await this.request(`/users/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(user),
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to update user',
+            }
+        }
+        return response.json();
+    }
+
+    async getGlobalState() {
+        const response = await this.request('/global/', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to get global state',
+            }
+        }
+        return response.json();
+    }
+
+    async createGlobalState(globalState: GlobalState) {
+        const response = await this.request('/global/', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+            body: JSON.stringify(globalState),
+        });
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to create global state',
+            }
+        }
+        return response.json();
+    }
 }

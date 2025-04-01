@@ -157,7 +157,6 @@ export function PasswordChangeModal({ isOpen, onClose }: PasswordChangeModalProp
           description: 'Your password has been updated.'
         });
         
-        console.log('Password change requested');
         handleClose();
       } else {
         // Show error toast for API errors

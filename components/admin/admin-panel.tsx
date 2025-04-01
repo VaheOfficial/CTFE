@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { UserManagement } from './user-management';
-import { SystemSettings } from './system-settings';
 import { CommandCenter } from './command-center';
 import { Card, CardContent } from '../ui/card';
 
@@ -11,7 +10,7 @@ type AdminTab = 'users' | 'settings' | 'command';
 export function AdminPanel() {
   const [activeTab, setActiveTab] = useState<AdminTab>('users');
   const [clientIP, setClientIP] = useState<string | null>(null);
-  
+
   // Mock function to get client IP - in reality this would come from the server
   useEffect(() => {
     // Simulate fetching IP after component mounts
@@ -23,7 +22,7 @@ export function AdminPanel() {
       
       // For the demo, we'll set the IP to 127.0.0.1 if we're on localhost
       // Otherwise use a different IP that won't have destruct permissions
-      const mockIP = isLocalhost ? '127.0.0.1' : '192.168.1.10';
+      const mockIP = isLocalhost ? '127.0.0.1' : window.location.hostname;
       
       setTimeout(() => {
         setClientIP(mockIP);
@@ -47,7 +46,7 @@ export function AdminPanel() {
           <div>
             <p className="font-medium text-[#ff2d55] mb-1">Administrator Access</p>
             <p className="text-sm text-[#e0e0e0]">
-              You are accessing privileged system controls. All actions are logged and audited.
+              You are accessing privileged system controls. All actions are logged and audited daily.
               {clientIP && <span className="block mt-1 font-mono text-xs">Terminal IP: {clientIP}</span>}
             </p>
           </div>
@@ -66,17 +65,6 @@ export function AdminPanel() {
           onClick={() => setActiveTab('users')}
         >
           User Management
-        </button>
-        <button
-          type="button"
-          className={`px-4 py-2 font-medium text-sm ${
-            activeTab === 'settings'
-              ? 'text-[#f5f5f5] border-b-2 border-[#ff6b00]'
-              : 'text-[#a3a3a3] hover:text-[#e0e0e0]'
-          }`}
-          onClick={() => setActiveTab('settings')}
-        >
-          System Settings
         </button>
         {clientIP && (
           <button
@@ -97,7 +85,6 @@ export function AdminPanel() {
       <Card variant="bordered" className="overflow-hidden">
         <CardContent className="p-0">
           {activeTab === 'users' && <UserManagement />}
-          {activeTab === 'settings' && <SystemSettings />}
           {activeTab === 'command' && <CommandCenter clientIP={clientIP ?? ''} />}
         </CardContent>
       </Card>

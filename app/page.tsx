@@ -7,11 +7,9 @@ import type { RootState } from '../redux/store';
 
 export default function Home() {
   const isAuthenticated = useSelector((state: RootState) => {
-    console.log(state);
     return state.auth.isAuthenticated;
   });
   const router = useRouter();
-  console.log(isAuthenticated);
   useEffect(() => {
     // Use client-side navigation instead of redirect for client-side state
     if (isAuthenticated) {

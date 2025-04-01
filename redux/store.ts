@@ -6,6 +6,7 @@ import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, 
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
 import { combineReducers } from '@reduxjs/toolkit';
 import adminReducer, { resetAdminState } from './adminSlice';
+import globalStateReducer, { resetGlobalState } from './globalStateSlice';
 import { removeAuthCookie } from '../lib/auth-utils';
 
 // Configure persistence for reducers
@@ -20,6 +21,7 @@ const appReducer = combineReducers({
   auth: authReducer,
   user: userReducer,
   admin: adminReducer,
+  globalState: globalStateReducer,
 });
 
 // Define the RootState type based on appReducer
@@ -60,6 +62,7 @@ export const logoutAndResetStore = () => {
   // First dispatch resets for each individual slice
   store.dispatch(resetUserState());
   store.dispatch(resetAdminState());
+  store.dispatch(resetGlobalState());
   
   // Then dispatch the main logout action that triggers the root reducer reset
   store.dispatch(logout());

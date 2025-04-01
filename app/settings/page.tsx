@@ -15,33 +15,46 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../../redux/userSlice';
 import type { RootState } from '../../redux/store';
 import { PasswordChangeModal } from '../../components/user/password-change-modal';
+import { toast } from 'sonner';
+import type { User } from '../../types/user.type';
 
 export default function SettingsPage() {
   // Initialize router, dispatch, and apiService
-  const router = useRouter();
   const dispatch = useDispatch();
   const apiService = React.useMemo(() => new ApiService(), []);
 
   // State for various settings
   const [activeTab, setActiveTab] = useState<'account' | 'notifications' | 'security'>('account');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
   
   // Form states
-  const [accountForm, setAccountForm] = useState({
-    name: 'John Doe',
-    email: 'john.doe@agency.gov'
+  const [accountForm, setAccountForm] = useState<Partial<User>>({
+    name: '',
+    email: ''
   });
   
   // Fetch user data from API if not already in Redux store
   const user = useSelector((state: RootState) => state.user.user);
   useEffect(() => {
-    if(user) {
-      return;
-    }
     const fetchUser = async () => {
       try {
+        // If we already have user data in Redux, use that
+        if (user?.name && user?.email) {
+          setAccountForm({
+            name: user.name ?? '',
+            email: user.email ?? ''
+          });
+          return;
+        }
+        
+        // Otherwise fetch from API
         const response = await apiService.me();
         dispatch(setUser(response.data));
+        setAccountForm({
+          name: response.data.name ?? '',
+          email: response.data.email ?? ''
+        });
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -51,21 +64,64 @@ export default function SettingsPage() {
   
   const isAuthorized = useSelector((state: RootState) => state.auth.isAuthenticated);
   const isAdmin = useSelector((state: RootState) => state.user.user?.role === 'admin');
+
   // Handler for account form changes
   const handleAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setAccountForm({ ...accountForm, [name]: value });
+    
+    // Validate email format if the email field is being changed
+    if (name === 'email') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!value) {
+        setEmailError('Email is required');
+      } else if (!emailRegex.test(value)) {
+        setEmailError('Please enter a valid email address');
+      } else {
+        setEmailError(null);
+      }
+    }
+    
+    setAccountForm(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+    console.log(accountForm);
   };
   
   // Handler for save button
-  const handleSaveSettings = () => {
-    setIsUpdating(true);
+  const handleSaveSettings = async () => {
+    // Validate email before submitting
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!accountForm.email) {
+      toast.error('Email is required', { richColors: true, position: 'top-center' });
+      return;
+    }
     
-    // Simulate API call
-    setTimeout(() => {
+    if (!emailRegex.test(accountForm.email)) {
+      toast.error('Please enter a valid email address', { richColors: true, position: 'top-center' });
+      return;
+    }
+    
+    setIsUpdating(true);
+    try {
+      const response = await apiService.updateUser(user?._id ?? '', accountForm);
+      dispatch(setUser(response.data));
+      toast.success('Settings updated successfully',
+        {
+          richColors: true,
+          position: 'top-center'
+        }
+      );
       setIsUpdating(false);
-      // In a real app, we would show a success toast here
-    }, 1000);
+    } catch (error) {
+      toast.error('Error updating user',
+        {
+          richColors: true,
+          position: 'top-center'
+        }
+      );
+      setIsUpdating(false);
+    }
   };
 
   // Handler for password change
@@ -146,7 +202,7 @@ export default function SettingsPage() {
                       <Input
                         id="name"
                         name="name"
-                        value={user?.name ?? 'Default User'}
+                        value={accountForm.name ?? 'Default User'}
                         onChange={handleAccountChange}
                         className="mt-1 bg-[#121212] border-[#2a2a2a]"
                       />
@@ -157,10 +213,14 @@ export default function SettingsPage() {
                         id="email"
                         name="email"
                         type="email"
-                        value={user?.email ?? 'default@agency.gov'}
+                        value={accountForm.email ?? ''}
                         onChange={handleAccountChange}
-                        className="mt-1 bg-[#121212] border-[#2a2a2a]"
+                        className={`mt-1 bg-[#121212] border-[#2a2a2a] ${emailError ? 'border-red-500' : ''}`}
+                        required
                       />
+                      {emailError && (
+                        <p className="text-red-500 text-xs mt-1">{emailError}</p>
+                      )}
                     </div>
                   </div>
                 </CardContent>

@@ -33,7 +33,6 @@ export default function ProfilePage() {
   const activeSession = useSelector((state: RootState) => state.auth.session);
   // Get user data from Redux store
   const user = useSelector((state: RootState) => {
-    console.log(state.user.user);
     return state.user.user;
   });
   const isAuthorized = useSelector((state: RootState) => state.auth.isAuthenticated);

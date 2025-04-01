@@ -1,11 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { ApiService } from '../../lib/api.service';
+import type { GlobalState } from '../../types/global.types';
+import type { RootState } from '../../redux/store';
+import { useSelector } from 'react-redux';
+import { fetchGlobalStates } from '../../utils/global-state-service';
 
 // List of authorized IPs that can perform destructive actions - restricting to local machine only
-const AUTHORIZED_IPS = ['127.0.0.1', 'localhost'];
+const AUTHORIZED_IPS = ["192.168.1.10"];
 
 interface CommandCenterProps {
   clientIP: string;
@@ -17,9 +22,69 @@ export function CommandCenter({ clientIP }: CommandCenterProps) {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+  const [isCheckingGlobalState, setIsCheckingGlobalState] = useState(false);
+  const hasCheckedGlobalState = useRef(false);
+  const user = useSelector((state: RootState) => state.user.user);
+
   const isAuthorized = AUTHORIZED_IPS.includes(clientIP);
   const correctCode = 'DESTRUCT-9875';
+
+  useEffect(() => {
+    // Only check global state once when access is denied and we haven't checked yet
+    if (!isAuthorized && !hasCheckedGlobalState.current && !isCheckingGlobalState) {
+      setIsCheckingGlobalState(true);
+      hasCheckedGlobalState.current = true;
+      
+      const apiService = new ApiService();
+      const checkAndCreateGlobalState = async () => {
+        try {
+          // Check if global state exists
+          const response = await apiService.getGlobalState();
+          let responseContains = false;
+          if(response){
+            // Check if response.data exists and is an array before using .some()
+            responseContains = Array.isArray(response.data) && 
+              response.data.some((item: GlobalState) => 
+                item.reason && typeof item.reason === 'string' && 
+                item.reason.includes('Unauthorized access to command destruct detected')
+              );
+          }
+          // If global state doesn't exist or an error occurred, create a critical state
+          if (!response.success || !response.data || !responseContains) {
+            const criticalState: GlobalState = {
+              _id: null,
+              state: "critical",
+              reason: `Unauthorized access to command destruct detected from IP: ${clientIP} - on Date: ${new Date().toLocaleString()} - by User: ${user?.name ?? 'Unknown'}`,
+              createdAt: null,
+              updatedAt: null,
+              timeout: null,
+              timeoutStop: null,
+              associatedUser: user?._id ?? null,
+              createdUser: user?._id ?? null
+            };
+            
+            const result = await apiService.createGlobalState(criticalState);
+            console.log('Global critical state created due to unauthorized access');
+            
+            // Force refresh the global state in the warning system
+            if (result.success) {
+              await fetchGlobalStates();
+            }
+          } else {
+            console.log('Global state already exists, no new state created');
+          }
+        } catch (err) {
+          console.error('Error handling global state:', err);
+        } finally {
+          setIsCheckingGlobalState(false);
+        }
+      };
+      
+      checkAndCreateGlobalState();
+    }
+  // Remove the dependencies that might cause unnecessary re-renders
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthorized, clientIP, isCheckingGlobalState, user?._id, user?.name]);
 
   const handleArm = () => {
     if (confirmationCode !== correctCode) {
