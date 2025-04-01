@@ -36,9 +36,10 @@ export class ApiService {
 
         if (!response.ok) {
             const errorData = await response.json();
+            console.log(errorData);
             return {
                 success: false,
-                message: errorData.data.message || 'Login failed',
+                message: errorData.error || 'Login failed',
             }
         }
 
@@ -163,6 +164,44 @@ export class ApiService {
             return {
                 success: false,
                 message: errorData.data.message || 'Failed to create global state',
+            }
+        }
+        return response.json();
+    }
+
+    async updateUserAsAdmin(id: string, user: Partial<User>) {
+        const response = await this.request(`/users/admin/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(user),
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to update user',
+            }
+        }
+        return response.json();
+    }
+
+    async resetUserPassword(id: string, password: string) {
+        const response = await this.request(`/users/admin/reset-password/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+            body: JSON.stringify({
+                newPassword: password,
+            }),
+        });
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to reset user password',
             }
         }
         return response.json();

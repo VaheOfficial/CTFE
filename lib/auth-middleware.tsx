@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../redux/store';
 import { UnauthorizedAction } from '../components/unauthorized-action';
+import { toast } from 'sonner';
 
 // Higher order component to protect routes
 export function withAuth<P extends object>(
@@ -37,13 +38,16 @@ export function withAuth<P extends object>(
     
     // If admin access is required but user is not admin, show unauthorized component
     if (requireAdmin && !isAdmin) {
+        
       return (
-        <UnauthorizedAction 
-          message="ADMIN ACCESS REQUIRED"
-          description="You do not have permission to access this area. This area requires administrative privileges. Incident will be reported."
-          actionText="Return to Dashboard"
-          actionLink="/dashboard"
-        />
+        <div className="flex items-center justify-center h-full bg-red-950 animate-pulse">
+            <UnauthorizedAction 
+            message="ADMIN ACCESS REQUIRED"
+            description="You do not have permission to access this area. This area requires administrative privileges. Incident will be reported."
+            actionText="Return to Dashboard"
+            actionLink="/dashboard"
+            />
+        </div>
       );
     }
     

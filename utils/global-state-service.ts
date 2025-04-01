@@ -4,6 +4,7 @@ import { clearAllStateItems, addStateItem } from '../redux/globalStateSlice';
 import { v4 as uuidv4 } from 'uuid';
 import type { StatusSeverity } from '../redux/globalStateSlice';
 import type { GlobalState } from '../types/global.types';
+import { toast } from 'sonner';
 
 // Define API response type
 interface ApiResponse {
@@ -89,5 +90,45 @@ export function stopGlobalStatePolling(): void {
   if (intervalId) {
     clearInterval(intervalId);
     intervalId = null;
+  }
+}
+
+// Add a warning for unauthorized access, preventing duplicates
+export async function addUnauthorizedAccessWarning(): Promise<void> {
+  const message = "SECURITY ALERT: Unauthorized system access attempt has been detected and logged";
+  const currentState = store.getState().globalState.items;
+
+  // Check if a similar warning already exists to prevent duplicates
+  const duplicateExists = currentState.some(item => 
+    item.message.includes("Unauthorized system access") && 
+    item.severity === 'critical'
+  );
+
+  // Only add if no duplicate exists
+  if (!duplicateExists) {
+    // Add to Redux store for immediate display
+    const id = uuidv4();
+    store.dispatch(
+      addStateItem({
+        id,
+        message,
+        severity: 'warning'
+      })
+    );
+    
+    // Add to backend through API
+    try {
+      const globalStateData: Partial<GlobalState> = {
+        _id: id,
+        state: 'warning',
+        reason: message,
+        timeout: 3600, // 1 hour in seconds
+        createdAt: new Date().toISOString(),
+      };
+
+      await apiService.createGlobalState(globalStateData as GlobalState);
+    } catch (error) {
+      console.error('Failed to add unauthorized access warning to server:', error);
+    }
   }
 } 

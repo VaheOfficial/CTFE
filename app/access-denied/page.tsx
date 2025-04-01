@@ -1,10 +1,19 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
 import { ClassificationBanner } from '../../components/classification-banner';
+import { toast } from 'sonner';
 
 export default function AccessDeniedPage() {
+  toast.error('You have been reported.', { 
+    richColors: true, 
+    position: 'top-center',
+    duration: 6000,
+    icon: '⚠️'
+  });
   return (
     <div className="min-h-screen flex flex-col bg-[#050505]">
       <ClassificationBanner level="confidential" />

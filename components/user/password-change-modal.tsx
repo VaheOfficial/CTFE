@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { AlertCircle, Check, Eye, EyeOff } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { ApiService } from '../../lib/api.service';
 import { toast } from 'sonner';
 

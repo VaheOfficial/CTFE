@@ -41,6 +41,7 @@ export function LoginForm() {
       if(response.success === false) {
         toast.error(response.message, {
           position: "top-center",
+          richColors: true,
         });
         return;
       }

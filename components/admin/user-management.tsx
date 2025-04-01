@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
 import { PasswordResetModal } from './password-reset-modal';
+import { ApiService } from '@/lib/api.service';
+import { toast } from 'sonner';
 
+// Ensure this type matches the one in PasswordResetModal
 type User = {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   role: 'admin' | 'operator' | 'viewer';
-  status: 'active' | 'suspended' | 'pending';
+  accountStatus: 'active' | 'suspended' | 'pending';
   lastLogin: string;
+  createdAt?: string;
+  updatedAt?: string;
+  id?: string; // Add this to be compatible with the modal's type
 };
 
 // Function to generate a strong password
@@ -42,40 +48,9 @@ const generateStrongPassword = () => {
 };
 
 export function UserManagement() {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      name: 'Jane Smith',
-      email: 'jane.smith@agency.gov',
-      role: 'admin',
-      status: 'active',
-      lastLogin: '2023-11-15T14:32:00Z',
-    },
-    {
-      id: '2',
-      name: 'John Doe',
-      email: 'john.doe@agency.gov',
-      role: 'operator',
-      status: 'active',
-      lastLogin: '2023-11-14T09:15:00Z',
-    },
-    {
-      id: '3',
-      name: 'Emily Johnson',
-      email: 'emily.johnson@contractor.com',
-      role: 'viewer',
-      status: 'pending',
-      lastLogin: 'Never',
-    },
-    {
-      id: '4',
-      name: 'Michael Chen',
-      email: 'michael.chen@agency.gov',
-      role: 'operator',
-      status: 'suspended',
-      lastLogin: '2023-10-25T11:45:00Z',
-    },
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -84,6 +59,34 @@ export function UserManagement() {
   
   // Password reset state
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Function to fetch users from API
+  const fetchUsers = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const apiService = new ApiService();
+      const response = await apiService.getAllUsers();
+      
+      if (!response.success) {
+        setError(response.message || 'Failed to fetch users');
+        return;
+      }
+      
+      setUsers(response.data);
+    } catch (err) {
+      setError('An error occurred while fetching users');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Fetch users from API when component mounts
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const filteredUsers = users.filter(
     (user) =>
@@ -101,14 +104,35 @@ export function UserManagement() {
     setIsEditing(true);
   };
 
-  const handleSaveUser = () => {
+  const handleSaveUser = async () => {
     if (selectedUser && editForm) {
-      const updatedUsers = users.map((user) =>
-        user.id === selectedUser.id ? { ...user, ...editForm } : user
-      );
-      setUsers(updatedUsers);
-      setSelectedUser({ ...selectedUser, ...editForm });
-      setIsEditing(false);
+      try {
+        setIsSaving(true);
+        const apiService = new ApiService();
+        const response = await apiService.updateUserAsAdmin(selectedUser._id, editForm);
+        
+        if (!response.success) {
+          toast.error(response.message || 'Failed to update user', { richColors: true, position: 'top-center'});
+          return;
+        }
+        
+        // Update the local state with the updated user
+        const updatedUsers = users.map((user) =>
+          user._id === selectedUser._id ? { ...user, ...editForm } : user
+        );
+        setUsers(updatedUsers);
+        setSelectedUser({ ...selectedUser, ...editForm });
+        toast.success('User updated successfully', { richColors: true, position: 'top-center'});
+        setIsEditing(false);
+        
+        // Refresh the users list to get the latest data
+        fetchUsers();
+      } catch (err) {
+        console.error(err);
+        toast.error('An error occurred while updating the user', { richColors: true, position: 'top-center'});
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -123,7 +147,7 @@ export function UserManagement() {
   };
 
   const handleStatusToggle = (status: 'active' | 'suspended') => {
-    setEditForm({ ...editForm, status });
+    setEditForm({ ...editForm, accountStatus: status });
   };
   
   const handleOpenResetModal = () => {
@@ -132,6 +156,8 @@ export function UserManagement() {
   
   const handleCloseResetModal = () => {
     setIsResetModalOpen(false);
+    // Refresh the users list after password reset
+    fetchUsers();
   };
 
   const statusColor = {
@@ -144,13 +170,6 @@ export function UserManagement() {
     admin: 'bg-[#ff2d55]/10 text-[#ff2d55]',
     operator: 'bg-[#ff6b00]/10 text-[#ff6b00]',
     viewer: 'bg-[#3a3a3c]/20 text-[#f5f5f5]',
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent, user: User) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleSelectUser(user);
-    }
   };
 
   return (
@@ -166,35 +185,50 @@ export function UserManagement() {
             className="bg-[#121212] border-[#2a2a2a]"
           />
         </div>
-        <ul className="space-y-2 max-h-[500px] overflow-y-auto">
-          {filteredUsers.map((user) => (
-            <li
-              key={user.id}
-              className={`p-3 rounded cursor-pointer ${
-                selectedUser?.id === user.id
-                  ? 'bg-[#1a1a1a] border-l-2 border-[#ff6b00]'
-                  : 'hover:bg-[#121212]'
-              }`}
-              onClick={() => handleSelectUser(user)}
-              onKeyDown={(e) => handleKeyPress(e, user)}
-              tabIndex={0}
-              aria-selected={selectedUser?.id === user.id}
-            >
-              <div className="font-medium">{user.name}</div>
-              <div className="text-sm text-[#a3a3a3]">{user.email}</div>
-              <div className="flex justify-between items-center mt-2">
-                <span
-                  className={`text-xs px-2 py-1 rounded-full ${roleColor[user.role]}`}
+        
+        {isLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ff6b00]" />
+          </div>
+        ) : error ? (
+          <div className="text-[#ff2d55] p-4 bg-[#ff2d55]/10 rounded">
+            {error}
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-[500px] overflow-y-auto">
+            {filteredUsers.length > 0 ? (
+              filteredUsers.map((user) => (
+                <button
+                  key={user._id}
+                  className={`w-full text-left p-3 rounded ${
+                    selectedUser?._id === user._id
+                      ? 'bg-[#1a1a1a] border-l-2 border-[#ff6b00]'
+                      : 'hover:bg-[#121212]'
+                  }`}
+                  onClick={() => handleSelectUser(user)}
+                  type="button"
                 >
-                  {user.role.toUpperCase()}
-                </span>
-                <span className={`text-xs ${statusColor[user.status]}`}>
-                  {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
-                </span>
+                  <div className="font-medium">{user.name}</div>
+                  <div className="text-sm text-[#a3a3a3]">{user.email}</div>
+                  <div className="flex justify-between items-center mt-2">
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${roleColor[user.role]}`}
+                    >
+                      {user.role.toUpperCase()}
+                    </span>
+                    <span className={`text-xs ${statusColor[user.accountStatus]}`}>
+                      {user.accountStatus.charAt(0).toUpperCase() + user.accountStatus.slice(1)}
+                    </span>
+                  </div>
+                </button>
+              ))
+            ) : (
+              <div className="p-4 text-center text-[#a3a3a3]">
+                No users found
               </div>
-            </li>
-          ))}
-        </ul>
+            )}
+          </div>
+        )}
       </div>
 
       {/* User details */}
@@ -229,6 +263,7 @@ export function UserManagement() {
                     variant="outline" 
                     onClick={handleCancelEdit} 
                     className="text-sm"
+                    disabled={isSaving}
                   >
                     Cancel
                   </Button>
@@ -236,8 +271,9 @@ export function UserManagement() {
                     type="button"
                     onClick={handleSaveUser} 
                     className="text-sm bg-[#ff6b00] hover:bg-[#ff6b00]/80 text-white"
+                    disabled={isSaving}
                   >
-                    Save Changes
+                    {isSaving ? 'Saving...' : 'Save Changes'}
                   </Button>
                 </div>
               )}
@@ -251,7 +287,7 @@ export function UserManagement() {
                     <Input
                       id="name"
                       name="name"
-                      value={editForm.name || ''}
+                      value={editForm.name ?? ''}
                       onChange={handleInputChange}
                       className="mt-1 bg-[#121212] border-[#2a2a2a]"
                     />
@@ -262,7 +298,7 @@ export function UserManagement() {
                       id="email"
                       name="email"
                       type="email"
-                      value={editForm.email || ''}
+                      value={editForm.email ?? ''}
                       onChange={handleInputChange}
                       className="mt-1 bg-[#121212] border-[#2a2a2a]"
                     />
@@ -274,7 +310,7 @@ export function UserManagement() {
                   <select
                     id="role"
                     name="role"
-                    value={editForm.role || ''}
+                    value={editForm.role ?? ''}
                     onChange={handleInputChange}
                     className="w-full mt-1 bg-[#121212] border border-[#2a2a2a] rounded-md p-2 text-[#f5f5f5]"
                   >
@@ -290,7 +326,7 @@ export function UserManagement() {
                     <div className="flex items-center space-x-2">
                       <Switch
                         id="active"
-                        checked={editForm.status === 'active'}
+                        checked={editForm.accountStatus === 'active'}
                         onCheckedChange={() => handleStatusToggle('active')}
                       />
                       <Label htmlFor="active" className="cursor-pointer">Active</Label>
@@ -298,7 +334,7 @@ export function UserManagement() {
                     <div className="flex items-center space-x-2">
                       <Switch
                         id="suspended"
-                        checked={editForm.status === 'suspended'}
+                        checked={editForm.accountStatus === 'suspended'}
                         onCheckedChange={() => handleStatusToggle('suspended')}
                       />
                       <Label htmlFor="suspended" className="cursor-pointer">Suspended</Label>
@@ -327,14 +363,14 @@ export function UserManagement() {
                   </div>
                   <div className="p-3 bg-[#121212] rounded-md">
                     <div className="text-sm text-[#a3a3a3]">Status</div>
-                    <div className={`font-medium ${statusColor[selectedUser.status]}`}>
-                      {selectedUser.status.charAt(0).toUpperCase() + selectedUser.status.slice(1)}
+                    <div className={`font-medium ${statusColor[selectedUser.accountStatus]}`}>
+                      {selectedUser.accountStatus.charAt(0).toUpperCase() + selectedUser.accountStatus.slice(1)}
                     </div>
                   </div>
                 </div>
                 <div className="p-3 bg-[#121212] rounded-md">
                   <div className="text-sm text-[#a3a3a3]">Last Login</div>
-                  <div className="font-medium">{selectedUser.lastLogin}</div>
+                  <div className="font-medium">{selectedUser.lastLogin ? new Date(selectedUser.lastLogin).toLocaleString() : 'Never'}</div>
                 </div>
               </div>
             )}
