@@ -1,13 +1,21 @@
+'use client';
+
 import React from 'react';
 import { Navbar } from '../../components/navbar';
 import { AdminPanel } from '../../components/admin/admin-panel';
 import { ClassificationBanner } from '../../components/classification-banner';
+import { withAdminAuth } from '../../lib/auth-middleware';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../redux/store';
 
-export default function AdminPage() {
+function AdminPage() {
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const isAdmin = useSelector((state: RootState) => state.user.user?.role === 'admin');
+
   return (
     <div className="min-h-screen bg-[#050505] text-[#f5f5f5]">
       <ClassificationBanner level="top-secret" />
-      <Navbar />
+      <Navbar isLoggedIn={isAuthenticated} isAdmin={isAdmin} />
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
@@ -25,4 +33,7 @@ export default function AdminPage() {
       </footer>
     </div>
   );
-} 
+}
+
+// Apply admin authentication middleware
+export default withAdminAuth(AdminPage); 

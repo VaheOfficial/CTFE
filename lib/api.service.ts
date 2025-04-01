@@ -86,4 +86,31 @@ export class ApiService {
         }
         return response.json();
     }
+
+    async logoutAll() {
+        const response = await this.request('/auth/logout-all', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+        return response.json();
+    }
+
+    async getAllUsers() {
+        const response = await this.request('/users/all', {
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to get all users',
+            }
+        }
+        return response.json();
+    }
+
 }

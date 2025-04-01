@@ -92,7 +92,7 @@ export function ChatBox() {
   };
 
   return (
-    <Card variant="bordered" className="overflow-hidden h-[323px] flex flex-col">
+    <Card variant="bordered" className="overflow-hidden h-[440px] flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 py-4 px-5 border-b border-[#1a1a1a]">
         <CardTitle className="text-sm font-medium text-[#f5f5f5]">Communications Channel</CardTitle>
         <div className="flex items-center">

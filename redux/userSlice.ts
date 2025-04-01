@@ -40,8 +40,12 @@ const userSlice = createSlice({
         setError: (state, action) => {
             state.error = action.payload;
         },
+        resetUserState: (state) => {
+            // Reset to initial state
+            return initialState;
+        },
     },
 })
 
-export const { setUser, setIsLoading, setError } = userSlice.actions;
+export const { setUser, setIsLoading, setError, resetUserState } = userSlice.actions;
 export default userSlice.reducer;

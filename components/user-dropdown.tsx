@@ -4,6 +4,7 @@ import { useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Avatar } from './ui/avatar';
 import type { User } from '../types/user.type';
+import { logoutAndResetStore } from '../redux/store';
 
 interface UserDropdownProps {
   isOpen: boolean;
@@ -78,6 +79,9 @@ export function UserDropdown({ isOpen, onClose, isAdmin = false, user }: UserDro
         <Link 
           href="/login" 
           className="block px-4 py-2 text-sm text-[#ff2d55] hover:bg-[#1a1a1a] transition-colors"
+          onClick={() => {
+            logoutAndResetStore();
+          }}
         >
           Sign out
         </Link>

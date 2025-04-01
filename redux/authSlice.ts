@@ -35,8 +35,21 @@ export const authSlice = createSlice({
     setSession: (state, action) => {
       state.session = action.payload;
     },
+    logout: (state) => {
+      // Reset all values to initial state
+      Object.assign(state, initialState);
+    },
   },
 });
 
-export const { setUser, setToken, setRefreshToken, setIsAuthenticated, setIsLoading, setError, setSession } = authSlice.actions;
+export const { 
+  setUser, 
+  setToken, 
+  setRefreshToken, 
+  setIsAuthenticated, 
+  setIsLoading, 
+  setError, 
+  setSession,
+  logout
+} = authSlice.actions;
 export default authSlice.reducer;

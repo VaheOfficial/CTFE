@@ -49,7 +49,8 @@ export default function SettingsPage() {
     fetchUser();
   }, [dispatch, apiService, user]);
   
-
+  const isAuthorized = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const isAdmin = useSelector((state: RootState) => state.user.user?.role === 'admin');
   // Handler for account form changes
   const handleAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -77,7 +78,7 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-[#050505] text-[#f5f5f5]">
       <ClassificationBanner level="confidential" />
-      <Navbar isLoggedIn={true} />
+      <Navbar isLoggedIn={isAuthorized} isAdmin={isAdmin} />
       
       <PasswordChangeModal
         isOpen={isPasswordModalOpen}
@@ -190,7 +191,20 @@ export default function SettingsPage() {
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="text-sm font-medium text-[#f5f5f5]">Change Password</p>
-                          <p className="text-xs text-[#a3a3a3] mt-1">Last changed {user?.lastPasswordChange ? `${Math.floor((new Date().getTime() - new Date(user.lastPasswordChange).getTime()) / (1000 * 60 * 60 * 24))} days ago` : 'Never'}</p>
+                          <p className="text-xs text-[#a3a3a3] mt-1">
+                            {user?.lastPasswordChange ? (() => {
+                              const timeDiff = new Date().getTime() - new Date(user.lastPasswordChange).getTime();
+                              const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                              const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                              const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                              const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+                              
+                              if (days > 0) return `Last changed ${days} day${days !== 1 ? 's' : ''} ago`;
+                              if (hours > 0) return `Last changed ${hours} hour${hours !== 1 ? 's' : ''} ago`;
+                              if (minutes > 0) return `Last changed ${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+                              return `Last changed ${seconds} second${seconds !== 1 ? 's' : ''} ago`;
+                            })() : 'Last changed Never'}
+                          </p>
                         </div>
                         <Button 
                           type="button"

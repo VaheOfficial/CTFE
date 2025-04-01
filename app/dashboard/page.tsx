@@ -8,6 +8,8 @@ import { WeatherWidget } from '../../components/dashboard/weather-widget';
 import { RadioCommunications } from '../../components/dashboard/radio-communications';
 import { ChatBox } from '../../components/dashboard/chat-box';
 import { ClassificationBanner } from '../../components/classification-banner';
+import type { RootState } from '../../redux/store';
+import { useSelector } from 'react-redux';
 
 // Example data - in a real app, this would come from an API
 const launchpadData = {
@@ -92,20 +94,21 @@ const radioMessages = [
     frequency: "437.50"
   }
 ];
-
 export default function Dashboard() {
+  const isAuthorized = useSelector((state: RootState) => state.auth.isAuthenticated) || false;
+  const isAdmin = useSelector((state: RootState) => state.user.user?.role === 'admin') || false;
   return (
     <div className="min-h-screen bg-[#050505] text-[#f5f5f5]">
       <ClassificationBanner level="unclassified" />
-      <Navbar isLoggedIn={true} isAdmin={true} />
+      <Navbar isLoggedIn={isAuthorized} isAdmin={isAdmin} />
       <main className="container mx-auto px-4 py-8 pb-12">
         <DashboardHeader {...launchpadData} />
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 h-[790px]">
+          <div className="lg:col-span-2 h-full">
             <VideoPlayer sources={cameraViews} />
           </div>
-          <div className="space-y-6">
+          <div className="lg:col-span-1 space-y-6 h-full flex flex-col justify-between">
             <WeatherWidget data={weatherData} />
             <ChatBox />
           </div>

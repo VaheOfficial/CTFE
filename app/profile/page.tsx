@@ -36,11 +36,12 @@ export default function ProfilePage() {
     console.log(state.user.user);
     return state.user.user;
   });
-
+  const isAuthorized = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const isAdmin = useSelector((state: RootState) => state.user.user?.role === 'admin');
   return (
     <div className="min-h-screen bg-[#050505] text-[#f5f5f5]">
       <ClassificationBanner level="confidential" />
-      <Navbar isLoggedIn={true} isAdmin={true} />
+      <Navbar isLoggedIn={isAuthorized} isAdmin={isAdmin} />
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
