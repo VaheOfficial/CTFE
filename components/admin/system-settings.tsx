@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
@@ -6,6 +5,7 @@ import { Slider } from '../ui/slider';
 import { Switch } from '../ui/switch';
 import { Textarea } from '../ui/textarea';
 import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
+import { useState } from 'react';
 
 type SystemConfig = {
   apiEndpoint: string;
@@ -18,99 +18,69 @@ type SystemConfig = {
   systemMessage: string;
 };
 
+type MessageState = {
+  type: 'success' | 'error';
+  text: string;
+} | null;
+
 export function SystemSettings() {
+  const [message, setMessage] = useState<MessageState>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  
+  // Hardcoded initial configuration
   const [config, setConfig] = useState<SystemConfig>({
-    apiEndpoint: 'https://api.mission-control.gov/v2',
+    apiEndpoint: 'https://api.example.com/v1',
     refreshRate: 5,
-    maxConnections: 20,
+    maxConnections: 15,
     dataRetentionDays: 30,
     maintenanceMode: false,
     debugMode: false,
-    notificationEmail: 'sysadmin@mission-control.gov',
-    systemMessage: 'Welcome to Mission Control System v2.1.5',
+    notificationEmail: 'admin@example.com',
+    systemMessage: 'Welcome to the system. Please contact admin for support.'
   });
 
-  // Fetch current settings when component mounts
-  useEffect(() => {
-    async function fetchSettings() {
-      try {
-        const response = await fetch('/api/system/settings');
-        if (response.ok) {
-          const data = await response.json();
-          // Merge API settings with our default config 
-          // (only maintenanceMode and debugMode come from API in this demo)
-          setConfig(prevConfig => ({
-            ...prevConfig,
-            maintenanceMode: data.maintenanceMode,
-            debugMode: data.debugMode
-          }));
-        }
-      } catch (error) {
-        console.error("Failed to fetch system settings:", error);
-      }
-    }
-    
-    fetchSettings();
-  }, []);
-
+  // Handle text input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setConfig({ ...config, [name]: value });
+    setConfig(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
+  // Handle slider changes
   const handleSliderChange = (name: keyof SystemConfig, value: number[]) => {
-    setConfig({ ...config, [name]: value[0] });
+    setConfig(prev => ({
+      ...prev,
+      [name]: value[0]
+    }));
   };
 
+  // Handle switch changes
   const handleSwitchChange = (name: keyof SystemConfig, checked: boolean) => {
-    setConfig({ ...config, [name]: checked });
-    
-    // For maintenance mode and debug mode, update the API immediately
-    if (name === 'maintenanceMode' || name === 'debugMode') {
-      updateSystemSettingsAPI({
-        [name]: checked
-      });
-    }
+    setConfig(prev => ({
+      ...prev,
+      [name]: checked
+    }));
   };
 
-  // Function to update the system settings via API
-  const updateSystemSettingsAPI = async (settings: Partial<SystemConfig>) => {
+  // Handle save settings
+  const handleSaveSettings = () => {
     setIsLoading(true);
-    setMessage(null);
     
-    try {
-      const response = await fetch('/api/system/settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(settings),
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      setMessage({
+        type: 'success',
+        text: 'System settings saved successfully'
       });
       
-      const data = await response.json();
-      
-      if (response.ok) {
-        setMessage({ type: 'success', text: data.message || 'Settings updated successfully' });
-      } else {
-        setMessage({ type: 'error', text: data.message || 'Failed to update settings' });
-      }
-    } catch (error) {
-      console.error('Error updating settings:', error);
-      setMessage({ type: 'error', text: 'An error occurred while updating settings' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSaveSettings = async () => {
-    // For the demo, we're only persisting maintenance mode and debug mode
-    // In a real app, you would send all the settings
-    updateSystemSettingsAPI({
-      maintenanceMode: config.maintenanceMode,
-      debugMode: config.debugMode
-    });
+      // Clear message after 3 seconds
+      setTimeout(() => {
+        setMessage(null);
+      }, 3000);
+    }, 1000);
   };
 
   return (

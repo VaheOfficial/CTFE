@@ -1,24 +1,19 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Avatar } from './ui/avatar';
+import type { User } from '../types/user.type';
 
 interface UserDropdownProps {
   isOpen: boolean;
   onClose: () => void;
   isAdmin?: boolean;
+  user: User;
 }
 
-export function UserDropdown({ isOpen, onClose, isAdmin = false }: UserDropdownProps) {
+export function UserDropdown({ isOpen, onClose, isAdmin = false, user }: UserDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // User data - in a real app would come from authentication context or props
-  const user = {
-    name: "John Doe",
-    email: "john.doe@agency.gov",
-    role: isAdmin ? "Administrator" : "Operator"
-  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -45,14 +40,14 @@ export function UserDropdown({ isOpen, onClose, isAdmin = false }: UserDropdownP
     >
       <div className="py-3 px-4 border-b border-[#1a1a1a]">
         <div className="flex items-center gap-3">
-          <Avatar name={user.name} size="sm" />
+          <Avatar name={user.name ?? 'Default User'} size="sm" />
           <div>
             <div className="text-sm font-medium text-[#f5f5f5]">{user.name}</div>
             <div className="text-xs text-[#a3a3a3]">{user.email}</div>
           </div>
         </div>
         <div className="mt-1.5 text-[0.65rem] px-1.5 py-0.5 bg-[#ff6b00]/20 text-[#ff6b00] rounded-sm inline-block">
-          {user.role.toUpperCase()}
+          {user.role?.toUpperCase()}
         </div>
       </div>
       

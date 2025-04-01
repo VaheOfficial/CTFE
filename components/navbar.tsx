@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { UserDropdown } from './user-dropdown';
 import { Avatar } from './ui/avatar';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../redux/store';
 
 interface NavbarProps {
   isLoggedIn?: boolean;
@@ -20,13 +22,11 @@ export function Navbar({ isLoggedIn = false, isAdmin = false }: NavbarProps) {
   const closeDropdown = () => {
     setIsDropdownOpen(false);
   };
-
+  const user = useSelector((state: RootState) => {
+    console.log(state.user);
+    return state.user.user;
+  });
   // User data - in a real app would come from authentication context
-  const user = {
-    name: "John Doe",
-    email: "john.doe@agency.gov",
-    role: isAdmin ? "Administrator" : "Operator"
-  };
 
   return (
     <header className="bg-[#0a0a0a] border-b border-[#1a1a1a]">
@@ -71,9 +71,9 @@ export function Navbar({ isLoggedIn = false, isAdmin = false }: NavbarProps) {
                 aria-expanded={isDropdownOpen}
                 aria-haspopup="true"
               >
-                <Avatar name={user.name} size="sm" />
+                <Avatar name={user?.name ?? 'Default User'} size="sm" />
               </button>
-              <UserDropdown isOpen={isDropdownOpen} onClose={closeDropdown} isAdmin={isAdmin} />
+              <UserDropdown isOpen={isDropdownOpen} onClose={closeDropdown} isAdmin={isAdmin} user={user} />
             </div>
           </div>
         )}

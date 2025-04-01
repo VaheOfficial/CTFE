@@ -6,20 +6,61 @@ import Link from 'next/link';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Card, CardContent, CardFooter } from './ui/card';
+import { setToken, setRefreshToken, setIsAuthenticated, setError } from '../redux/authSlice';
+import { setUser } from '../redux/userSlice';
+import { useDispatch } from 'react-redux';
+import { ApiService } from '../lib/api.service';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const apiService = new ApiService();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulating authentication delay
-    setTimeout(() => {
+    const formData = new FormData(e.target as HTMLFormElement);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    console.log(email, password);
+    try {
+      setIsLoading(true);
+      const response = await apiService.login(email, password);
+      
+      // Check if the login was successful
+      if(response.success === false) {
+        toast.error(response.message, {
+          position: "top-center",
+        });
+        return;
+      }
+      
+      // Set the token in the Redux store
+      dispatch(setToken(response.data.accessToken));
+      if (response.data.refreshToken) {
+        dispatch(setRefreshToken(response.data.refreshToken));
+      }
+      dispatch(setIsAuthenticated(true));
+      dispatch(setUser(response.data.user));
+      
+      // Show a success toast
+      toast.success('Login successful!', {
+        position: "top-center",
+        richColors: true,
+      });
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Login failed:', error);
+      dispatch(setError('Invalid email or password'));
+      toast.error('Invalid email or password', {
+        position: "top-center",
+        richColors: true,
+      });
+    } finally {
       setIsLoading(false);
-      // In a real app, we would redirect to dashboard here
-      window.location.href = '/dashboard';
-    }, 1000);
+    }
   };
   
   return (
@@ -32,6 +73,7 @@ export function LoginForm() {
             </label>
             <Input 
               id="email"
+              name="email"
               type="email" 
               placeholder="employee@spaceforce.gov" 
               required 
@@ -45,6 +87,7 @@ export function LoginForm() {
             </label>
             <Input 
               id="password"
+              name="password"
               type="password" 
               placeholder="••••••••" 
               required 
