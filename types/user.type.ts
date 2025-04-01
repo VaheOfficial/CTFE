@@ -6,6 +6,7 @@ export interface User {
     accountStatus: string | null;
     lastActive: string | null;
     lastLogin: string | null;
+    lastPasswordChange: string | null;
     logEntries: LogEntry[] | null;
     activeSessions: ActiveSession[] | null;
     createdAt: string | null;

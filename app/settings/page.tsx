@@ -190,7 +190,7 @@ export default function SettingsPage() {
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="text-sm font-medium text-[#f5f5f5]">Change Password</p>
-                          <p className="text-xs text-[#a3a3a3] mt-1">Last changed 30 days ago</p>
+                          <p className="text-xs text-[#a3a3a3] mt-1">Last changed {user?.lastPasswordChange ? `${Math.floor((new Date().getTime() - new Date(user.lastPasswordChange).getTime()) / (1000 * 60 * 60 * 24))} days ago` : 'Never'}</p>
                         </div>
                         <Button 
                           type="button"

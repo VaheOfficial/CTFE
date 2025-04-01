@@ -16,6 +16,7 @@ export const initialState: UserState = {
         accountStatus: null,
         lastActive: null,
         lastLogin: null,
+        lastPasswordChange: null,
         logEntries: [],
         activeSessions: [],
         createdAt: null,
