@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 
@@ -17,6 +17,21 @@ interface VideoPlayerProps {
 export function VideoPlayer({ sources }: VideoPlayerProps) {
   const [selectedSource, setSelectedSource] = useState<string>(sources[0]?.id || '');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [currentTime, setCurrentTime] = useState<string>("");
+
+  // Only update time on client-side to prevent hydration mismatch
+  useEffect(() => {
+    // Initial time update
+    setCurrentTime(new Date().toLocaleTimeString());
+    
+    // Update the time every second
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000);
+    
+    // Clean up interval on unmount
+    return () => clearInterval(timer);
+  }, []);
 
   const handleToggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
@@ -90,7 +105,7 @@ export function VideoPlayer({ sources }: VideoPlayerProps) {
               </div>
               
               <div className="text-xs text-[#999999] font-mono">
-                {new Date().toLocaleTimeString()}
+                {currentTime}
               </div>
             </div>
           </div>
