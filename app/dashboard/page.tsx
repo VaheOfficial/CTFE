@@ -28,7 +28,7 @@ const weatherData = {
   windSpeed: 12,
   windDirection: "NE",
   pressure: 1013,
-  condition: "clear" as const,
+  condition: "overcast" as const,
   updatedAt: "10:25 AM",
   altitude: 10000 ,
   windChill: 25
@@ -109,7 +109,7 @@ export default function Dashboard() {
             <VideoPlayer sources={cameraViews} />
           </div>
           <div className="lg:col-span-1 space-y-6 h-full flex flex-col justify-between">
-            <WeatherWidget data={weatherData} />
+            <WeatherWidget />
             <ChatBox />
           </div>
         </div>

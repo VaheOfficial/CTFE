@@ -6,7 +6,7 @@ export class ApiService {
     private readonly baseUrl: string;
 
     constructor() {
-        this.baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
+        this.baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://192.168.1.51:5000';
     }
 
     private getHeaders() {
@@ -202,6 +202,23 @@ export class ApiService {
             return {
                 success: false,
                 message: errorData.data.message || 'Failed to reset user password',
+            }
+        }
+        return response.json();
+    }
+
+    async getWeatherData() {
+        const response = await this.request('/weather/', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to get weather data',
             }
         }
         return response.json();
