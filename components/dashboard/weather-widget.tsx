@@ -10,7 +10,7 @@ import overcast from '../../public/overcast.svg';
 import type { RootState } from '../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/redux/userSlice';
-import { setWeatherData } from '@/redux/weatherSlice';
+import { setTemperaturePreference, setWeatherData } from '@/redux/weatherSlice';
 
 interface WeatherData {
   temperatureC: number;
@@ -68,13 +68,15 @@ export function WeatherWidget() {
   function temperaturePreference() {
     console.log(user?.temperaturePreference);
     if(user?.temperaturePreference === 'c') {
+      dispatch(setTemperaturePreference('c'));
       return weatherData?.temperatureC;
     } else {
+      dispatch(setTemperaturePreference('f'));
       return weatherData?.temperatureF;
     }
   }
 
-  async function setTemperaturePreference(preference: string) {
+  async function setTemperaturePreferenceLocal(preference: string) {
     const apiService = new ApiService();
     const result = await apiService.setTemperaturePreference(preference);
     if(result) {
@@ -228,8 +230,8 @@ export function WeatherWidget() {
                 </div>
               </div>
               <div className="flex items-start space-x-2">
-                <button className={`text-xs border rounded-md px-2 py-1 hover:border-gray-500 transition-all ${user?.temperaturePreference === 'c' ? 'bg-[#2a2a2a] text-white border-[#3a3a3a]' : 'text-[#a3a3a3] border-gray-600'}`} onClick={() => setTemperaturePreference('c')}>°C</button>
-                <button className={`text-xs border rounded-md px-2 py-1 hover:border-gray-500 transition-all ${user?.temperaturePreference === 'f' ? 'bg-[#2a2a2a] text-white border-[#3a3a3a]' : 'text-[#a3a3a3] border-gray-600'}`} onClick={() => setTemperaturePreference('f')}>°F</button>
+                <button className={`text-xs border rounded-md px-2 py-1 hover:border-gray-500 transition-all ${user?.temperaturePreference === 'c' ? 'bg-[#2a2a2a] text-white border-[#3a3a3a]' : 'text-[#a3a3a3] border-gray-600'}`} onClick={() => setTemperaturePreferenceLocal('c')}>°C</button>
+                <button className={`text-xs border rounded-md px-2 py-1 hover:border-gray-500 transition-all ${user?.temperaturePreference === 'f' ? 'bg-[#2a2a2a] text-white border-[#3a3a3a]' : 'text-[#a3a3a3] border-gray-600'}`} onClick={() => setTemperaturePreferenceLocal('f')}>°F</button>
               </div>
             </div>
           </div>
