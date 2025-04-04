@@ -17,9 +17,6 @@ const launchpadData = {
   launchpadLocation: "Vandenberg SFB, CA",
   activeStatus: "active" as const,
   nextLaunchTime: "2024-03-31 14:30 UTC",
-  temperature: 28,
-  windSpeed: 12,
-  humidity: 65
 };
 
 const weatherData = {

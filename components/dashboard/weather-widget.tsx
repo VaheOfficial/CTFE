@@ -7,9 +7,14 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import partialCloudy from '../../public/partialy-cloudy.svg';
 import overcast from '../../public/overcast.svg';
+import type { RootState } from '../../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUser } from '@/redux/userSlice';
+import { setWeatherData } from '@/redux/weatherSlice';
 
 interface WeatherData {
-  temperature: number;
+  temperatureC: number;
+  temperatureF: number;
   humidity: number;
   windSpeed: number;
   windDirection: string;
@@ -21,15 +26,17 @@ interface WeatherData {
 }
 
 export function WeatherWidget() {
-
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const user = useSelector((state: RootState) => state.user.user);
+  const dispatch = useDispatch();
+  const [weatherData, setWeatherDataLocal] = useState<WeatherData | null>(null);
 
   useEffect(() => {
     const fetchWeatherData = async () => {
       const apiService = new ApiService();
       const result = await apiService.getWeatherData();
       if(result) {
-        setWeatherData(result);
+        dispatch(setWeatherData(result));
+        setWeatherDataLocal(result);
       }
     }
     
@@ -57,6 +64,23 @@ export function WeatherWidget() {
       }
     };
   }, []);
+
+  function temperaturePreference() {
+    console.log(user?.temperaturePreference);
+    if(user?.temperaturePreference === 'c') {
+      return weatherData?.temperatureC;
+    } else {
+      return weatherData?.temperatureF;
+    }
+  }
+
+  async function setTemperaturePreference(preference: string) {
+    const apiService = new ApiService();
+    const result = await apiService.setTemperaturePreference(preference);
+    if(result) {
+      dispatch(setUser({ ...user, temperaturePreference: preference }));
+    }
+  }
 
   const getWeatherIcon = (condition: string): ReactNode => {
     switch (condition) {
@@ -193,13 +217,19 @@ export function WeatherWidget() {
       <CardContent className="px-5 py-4">
         <div className="flex flex-col space-y-5">
           <div className="flex items-center space-x-4">
-            {getWeatherIcon(weatherData?.condition || '')}
-            <div>
-              <div className="text-2xl font-medium text-[#f5f5f5]">
-                {weatherData?.temperature}°C
+            {getWeatherIcon(weatherData?.condition.trim().toLowerCase() || '')}
+            <div className="flex flex-row w-full justify-between space-x-2">
+              <div className="flex flex-col items-start space-x-2">
+                <div className="text-2xl font-medium text-[#f5f5f5]">
+                  {temperaturePreference()}°C
+                </div>
+                <div className="capitalize text-xs text-[#a3a3a3] mt-0.5">
+                  {weatherData?.condition}
+                </div>
               </div>
-              <div className="capitalize text-xs text-[#a3a3a3] mt-0.5">
-                {weatherData?.condition}
+              <div className="flex items-start space-x-2">
+                <button className={`text-xs border rounded-md px-2 py-1 hover:border-gray-500 transition-all ${user?.temperaturePreference === 'c' ? 'bg-[#2a2a2a] text-white border-[#3a3a3a]' : 'text-[#a3a3a3] border-gray-600'}`} onClick={() => setTemperaturePreference('c')}>°C</button>
+                <button className={`text-xs border rounded-md px-2 py-1 hover:border-gray-500 transition-all ${user?.temperaturePreference === 'f' ? 'bg-[#2a2a2a] text-white border-[#3a3a3a]' : 'text-[#a3a3a3] border-gray-600'}`} onClick={() => setTemperaturePreference('f')}>°F</button>
               </div>
             </div>
           </div>

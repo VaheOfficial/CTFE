@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react';
 import { Card, CardContent } from '../ui/card';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
+import { useEffect, useState } from 'react';
 
 interface DashboardHeaderProps {
   launchpadName: string;
   launchpadLocation: string;
   activeStatus: 'active' | 'inactive' | 'maintenance' | 'launch-ready';
   nextLaunchTime?: string;
-  temperature?: number;
-  windSpeed?: number;
-  humidity?: number;
 }
 
 export function DashboardHeader({
@@ -16,10 +16,16 @@ export function DashboardHeader({
   launchpadLocation,
   activeStatus,
   nextLaunchTime,
-  temperature,
-  windSpeed,
-  humidity,
 }: DashboardHeaderProps) {
+  const temperaturePreference = useSelector((state: RootState) => state.weather.temperaturePreference);
+  const temperatureC = useSelector((state: RootState) => state.weather.temperatureC);
+  const temperatureF = useSelector((state: RootState) => state.weather.temperatureF);
+  const windSpeed = useSelector((state: RootState) => state.weather.windSpeed);
+  const humidity = useSelector((state: RootState) => state.weather.humidity);
+  console.log(`temperaturePreference: ${temperaturePreference}`);
+  // Derive the temperature based on preference
+  const temperature = temperaturePreference === 'c' ? temperatureC : temperatureF;
+
   const getStatusColor = (status: string): string => {
     switch (status) {
       case 'active':
@@ -110,7 +116,7 @@ export function DashboardHeader({
               {temperature !== undefined && (
                 <div className="flex flex-col items-center bg-[#0a0a0a] border border-[#1a1a1a] hover:border-[#252525] transition-all rounded-lg px-3 py-2.5">
                   <span className="text-xs text-[#a3a3a3]">Temp</span>
-                  <span className="font-medium text-[#f5f5f5]">{temperature}°C</span>
+                  <span className="font-medium text-[#f5f5f5]">{temperature}°{temperaturePreference === 'c' ? 'C' : 'F'}</span>
                 </div>
               )}
               

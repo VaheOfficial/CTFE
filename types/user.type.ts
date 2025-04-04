@@ -3,6 +3,7 @@ export interface User {
     email: string | null;
     role: string | null;
     clearanceLevel: string | null;
+    temperaturePreference: string | null;
     accountStatus: string | null;
     lastActive: string | null;
     lastLogin: string | null;

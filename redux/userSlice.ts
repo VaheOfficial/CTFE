@@ -13,6 +13,7 @@ export const initialState: UserState = {
         email: null,
         role: null,
         clearanceLevel: null,
+        temperaturePreference: null,
         accountStatus: null,
         lastActive: null,
         lastLogin: null,

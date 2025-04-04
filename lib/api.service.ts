@@ -223,4 +223,22 @@ export class ApiService {
         }
         return response.json();
     }
+
+    async setTemperaturePreference(preference: string) {
+        const response = await this.request('/weather/temperature-preference', {
+            method: 'POST',
+            body: JSON.stringify({ preference }),
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to set temperature preference',
+            }
+        }
+        return response.json();
+    }
 }

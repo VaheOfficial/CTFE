@@ -8,6 +8,7 @@ import { combineReducers } from '@reduxjs/toolkit';
 import adminReducer, { resetAdminState } from './adminSlice';
 import globalStateReducer, { resetGlobalState } from './globalStateSlice';
 import { removeAuthCookie } from '../lib/auth-utils';
+import weatherReducer, { resetWeatherState } from './weatherSlice';
 
 // Configure persistence for reducers
 const persistConfig = {
@@ -22,6 +23,7 @@ const appReducer = combineReducers({
   user: userReducer,
   admin: adminReducer,
   globalState: globalStateReducer,
+  weather: weatherReducer,
 });
 
 // Define the RootState type based on appReducer
@@ -63,7 +65,7 @@ export const logoutAndResetStore = () => {
   store.dispatch(resetUserState());
   store.dispatch(resetAdminState());
   store.dispatch(resetGlobalState());
-  
+  store.dispatch(resetWeatherState());
   // Then dispatch the main logout action that triggers the root reducer reset
   store.dispatch(logout());
   
