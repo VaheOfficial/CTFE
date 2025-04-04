@@ -2,7 +2,10 @@ import type { ReactNode } from 'react';
 import { Card, CardContent } from '../ui/card';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { ApiService } from '@/lib/api.service';
+import { LaunchCountdown } from './launch-countdown';
+import { CountdownTimer } from './countdown-timer';
 
 interface DashboardHeaderProps {
   launchpadName: string;
@@ -17,6 +20,49 @@ export function DashboardHeader({
   activeStatus,
   nextLaunchTime,
 }: DashboardHeaderProps) {
+  const [nextLaunch, setNextLaunch] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchLaunches = useCallback(async () => {
+    try {
+      setLoading(true);
+      const apiService = new ApiService();
+      const launchData = await apiService.getLaunches();
+      let closestLaunch = null;
+      const now = new Date();
+      
+      for (const launch of launchData.data) {
+        // Find the closest upcoming launch by date
+        const launchDate = new Date(launch.date);
+        
+        if (launchDate > now) {
+          if (!closestLaunch || launchDate < new Date(closestLaunch.date)) {
+            closestLaunch = launch;
+          }
+        }
+      }
+      
+      setNextLaunch(closestLaunch);
+    } catch (error) {
+      console.error('Error fetching launches:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLaunches();
+  }, [fetchLaunches]);
+
+  // Function to handle countdown end and refetch launches
+  const handleCountdownEnd = useCallback(() => {
+    console.log('Countdown ended, refetching launches...');
+    fetchLaunches();
+  }, [fetchLaunches]);
+
+  // Format the launch date if available
+  const formattedLaunchDate = nextLaunch?.date ? new Date(nextLaunch.date).toLocaleString() : null;
+
   const temperaturePreference = useSelector((state: RootState) => state.weather.temperaturePreference);
   const temperatureC = useSelector((state: RootState) => state.weather.temperatureC);
   const temperatureF = useSelector((state: RootState) => state.weather.temperatureF);
@@ -104,32 +150,43 @@ export function DashboardHeader({
           </div>
 
           <div className="mt-6 md:mt-0 flex flex-col sm:flex-row gap-4">
-            {nextLaunchTime && (
-              <div className="flex flex-col items-center bg-[#ff6b00]/5 backdrop-blur-sm border border-[#ff6b00]/20 rounded-lg px-4 py-3">
-                <span className="text-sm text-[#a3a3a3]">Next Launch</span>
-                <span className="font-medium text-[#ff6b00]">{nextLaunchTime}</span>
-              </div>
-            )}
+            <div className="flex flex-col items-center bg-[#ff6b00]/5 backdrop-blur-sm border border-[#ff6b00]/20 rounded-lg px-4 py-3 min-w-[200px]">
+              <span className="text-sm text-[#a3a3a3]">Next Launch</span>
+              {loading ? (
+                <span className="font-medium text-[#a3a3a3]">Loading...</span>
+              ) : nextLaunch ? (
+                <span className="font-medium text-[#ff6b00] text-center overflow-hidden text-ellipsis whitespace-nowrap">{formattedLaunchDate}</span>
+              ) : (
+                <span className="font-medium text-[#a3a3a3]">No launches scheduled</span>
+              )}
+            </div>
             
-            <div className="grid grid-cols-3 gap-2">
+              <div className={`grid ${nextLaunch?.date ? 'grid-cols-4' : 'grid-cols-3'} gap-2`}>
+              {nextLaunch?.date && (
+                <CountdownTimer 
+                  launchDate={nextLaunch.date} 
+                  onCountdownEnd={handleCountdownEnd}
+                />
+              )}
+              
               {temperature !== undefined && (
-                <div className="flex flex-col items-center bg-[#0a0a0a] border border-[#1a1a1a] hover:border-[#252525] transition-all rounded-lg px-3 py-2.5">
+                <div className="flex flex-col items-center bg-[#0a0a0a] border border-[#1a1a1a] hover:border-[#252525] transition-all rounded-lg px-3 py-2.5 w-[160px]">
                   <span className="text-xs text-[#a3a3a3]">Temp</span>
-                  <span className="font-medium text-[#f5f5f5]">{temperature}°{temperaturePreference === 'c' ? 'C' : 'F'}</span>
+                  <span className="font-medium text-[#f5f5f5] text-center w-full">{temperature}°{temperaturePreference === 'c' ? 'C' : 'F'}</span>
                 </div>
               )}
               
               {windSpeed !== undefined && (
-                <div className="flex flex-col items-center bg-[#0a0a0a] border border-[#1a1a1a] hover:border-[#252525] transition-all rounded-lg px-3 py-2.5">
+                <div className="flex flex-col items-center bg-[#0a0a0a] border border-[#1a1a1a] hover:border-[#252525] transition-all rounded-lg px-3 py-2.5 w-[160px]">
                   <span className="text-xs text-[#a3a3a3]">Wind</span>
-                  <span className="font-medium text-[#f5f5f5]">{windSpeed} km/h</span>
+                  <span className="font-medium text-[#f5f5f5] text-center w-full">{windSpeed} km/h</span>
                 </div>
               )}
               
               {humidity !== undefined && (
-                <div className="flex flex-col items-center bg-[#0a0a0a] border border-[#1a1a1a] hover:border-[#252525] transition-all rounded-lg px-3 py-2.5">
+                <div className="flex flex-col items-center bg-[#0a0a0a] border border-[#1a1a1a] hover:border-[#252525] transition-all rounded-lg px-3 py-2.5 w-[160px]">
                   <span className="text-xs text-[#a3a3a3]">Humidity</span>
-                  <span className="font-medium text-[#f5f5f5]">{humidity}%</span>
+                  <span className="font-medium text-[#f5f5f5] text-center w-full">{humidity}%</span>
                 </div>
               )}
             </div>

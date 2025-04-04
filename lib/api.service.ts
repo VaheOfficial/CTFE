@@ -241,4 +241,21 @@ export class ApiService {
         }
         return response.json();
     }
+
+    async getLaunches() {
+        const response = await this.request('/global/launch', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to get launches',
+            }
+        }
+        return response.json();
+    }
 }
