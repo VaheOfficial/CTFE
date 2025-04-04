@@ -112,7 +112,7 @@ export default function ProfilePage() {
                 <Card variant="bordered" className="bg-[#121212]">
                   <CardContent className="p-4">
                     <h3 className="text-[#a3a3a3] text-sm mb-1">Missions</h3>
-                    <p className="text-2xl font-semibold text-[#f5f5f5]">{user.missionsParticipated?.length ?? 0}</p>
+                    <p className="text-2xl font-semibold text-[#f5f5f5]">{user.missions?.length ?? 0}</p>
                     <p className="text-xs text-[#a3a3a3] mt-1">Total participated</p>
                   </CardContent>
                 </Card>

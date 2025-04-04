@@ -10,6 +10,8 @@ export interface User {
     lastPasswordChange: string | null;
     logEntries: LogEntry[] | null;
     activeSessions: ActiveSession[] | null;
+    missions: Mission[] | null;
+    commendations: Commendation[] | null;
     createdAt: string | null;
     updatedAt: string | null;
     _id: string | null;
@@ -39,3 +41,26 @@ export interface ActiveSession {
     lastActive: string | null;
 }
 
+export interface Mission {
+    _id: string | null;
+    name: string | null;
+    description: string | null;
+    status: string | null;
+    participants: string[] | null;
+    commendations: string[] | null;
+    createdAt: string | null;
+    updatedAt: string | null;
+    launch: string | null;
+}
+
+export interface Commendation {
+    _id: string | null;
+    name: string | null;
+    description: string | null;    
+    awardee: string | null;
+    revoked: boolean | null;
+    revokedDate: string | null;
+    reason: string | null;
+    createdAt: string | null;
+    updatedAt: string | null;
+}

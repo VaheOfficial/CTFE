@@ -66,7 +66,6 @@ export function WeatherWidget() {
   }, []);
 
   function temperaturePreference() {
-    console.log(user?.temperaturePreference);
     if(user?.temperaturePreference === 'c') {
       dispatch(setTemperaturePreference('c'));
       return weatherData?.temperatureC;
@@ -255,8 +254,8 @@ export function WeatherWidget() {
             <div className="flex justify-between items-center p-3 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
               <span className="text-xs text-[#a3a3a3]">Wind Direction</span>
               <div className="flex items-center">
-                <span className="text-xs font-medium text-[#f5f5f5] mr-1.5">{weatherData?.windDirection}</span>
-                {getWindDirectionArrow(weatherData?.windDirection || '')}
+                <span className="text-xs font-medium text-[#f5f5f5] mr-1.5">{weatherData?.windDirection ? weatherData.windDirection.slice(-2) : 'N/A'}</span>
+                {getWindDirectionArrow(weatherData?.windDirection ? weatherData.windDirection.slice(-2) : '')}
               </div>
             </div>
 

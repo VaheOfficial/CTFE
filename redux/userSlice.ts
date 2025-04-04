@@ -20,6 +20,8 @@ export const initialState: UserState = {
         lastPasswordChange: null,
         logEntries: [],
         activeSessions: [],
+        missions: [],
+        commendations: [],
         createdAt: null,
         updatedAt: null,
         _id: null,

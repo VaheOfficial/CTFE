@@ -22,7 +22,6 @@ export function DashboardHeader({
   const temperatureF = useSelector((state: RootState) => state.weather.temperatureF);
   const windSpeed = useSelector((state: RootState) => state.weather.windSpeed);
   const humidity = useSelector((state: RootState) => state.weather.humidity);
-  console.log(`temperaturePreference: ${temperaturePreference}`);
   // Derive the temperature based on preference
   const temperature = temperaturePreference === 'c' ? temperatureC : temperatureF;
 
