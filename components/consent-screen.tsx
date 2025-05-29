@@ -69,7 +69,7 @@ export function ConsentScreen({ onAccept, onDecline }: ConsentScreenProps) {
             </div>
             
             <div className="text-center text-xs text-[#a3a3a3] mt-2.5">
-              By selecting "ACCEPT" you acknowledge understanding of these terms and provide consent to monitoring.
+              By selecting &quot;ACCEPT&quot; you acknowledge understanding of these terms and provide consent to monitoring.
             </div>
           </CardContent>
           <CardFooter className="border-t border-[#1a1a1a] p-7 flex flex-col sm:flex-row gap-3 sm:gap-4">

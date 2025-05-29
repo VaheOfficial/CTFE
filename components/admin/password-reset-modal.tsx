@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Check, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { ApiService } from '@/lib/api.service';
 import { toast } from 'sonner';
 
@@ -365,7 +365,7 @@ export function PasswordResetModal({ user, isOpen, onClose }: PasswordResetModal
           )}
           
           <div className="p-3 bg-[#121212] rounded text-sm text-[#a3a3a3]">
-            <p>• This action will immediately invalidate the user's current password</p>
+            <p>• This action will immediately invalidate the user&apos;s current password</p>
             <p>• User will be prompted to change their password on next login</p>
             <p>• This action will be logged in the system security audit</p>
           </div>

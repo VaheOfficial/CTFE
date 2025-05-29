@@ -8,8 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
-import { Switch } from '../../components/ui/switch';
-import { useRouter } from 'next/navigation';
 import { ApiService } from '../../lib/api.service';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../../redux/userSlice';
@@ -113,7 +111,7 @@ export default function SettingsPage() {
         }
       );
       setIsUpdating(false);
-    } catch (error) {
+    } catch {
       toast.error('Error updating user',
         {
           richColors: true,
@@ -337,35 +335,5 @@ function NavButton({
       </span>
       {children}
     </button>
-  );
-}
-
-function ToggleItem({ 
-  label, 
-  description, 
-  checked, 
-  onChange 
-}: { 
-  label: string; 
-  description: string;
-  checked: boolean;
-  onChange: () => void;
-}) {
-  return (
-    <div className="flex items-center justify-between py-2 border-b border-[#1a1a1a] last:border-0">
-      <div>
-        <Label htmlFor={label.replace(/\s+/g, '-').toLowerCase()} className="font-medium cursor-pointer">
-          {label}
-        </Label>
-        <p className="text-xs text-[#a3a3a3] mt-0.5">
-          {description}
-        </p>
-      </div>
-      <Switch
-        id={label.replace(/\s+/g, '-').toLowerCase()}
-        checked={checked}
-        onCheckedChange={onChange}
-      />
-    </div>
   );
 } 

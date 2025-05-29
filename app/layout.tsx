@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "Mission Control - Real-Time Rocket Launch Monitoring",
   description: "Access high-frequency radio audio, live video feeds, and real-time weather data from rocket launch facilities around the world.",
   keywords: "rocket launch, real-time monitoring, space launch, launchpad data, rocket telemetry",
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

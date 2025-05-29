@@ -166,7 +166,7 @@ export function PasswordChangeModal({ isOpen, onClose }: PasswordChangeModalProp
         });
         setError(response.message);
       }
-    } catch (err) {
+    } catch {
       // Handle unexpected errors with toast
       toast.error('Failed to change password', {
         position: "top-center",
@@ -354,8 +354,8 @@ export function PasswordChangeModal({ isOpen, onClose }: PasswordChangeModalProp
           </div>
           
           <div className="p-3 bg-[#121212] rounded text-sm text-[#a3a3a3]">
-            <p>• For security reasons, you'll need to log in again after changing your password</p>
-            <p>• Make sure to use a strong, unique password that you don't use elsewhere</p>
+            <p>• For security reasons, you&apos;ll need to log in again after changing your password</p>
+            <p>• Make sure to use a strong, unique password that you don&apos;t use elsewhere</p>
             <p>• This action will be logged in the system security audit</p>
           </div>
         </div>

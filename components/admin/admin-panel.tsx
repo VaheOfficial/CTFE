@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { UserManagement } from './user-management';
 import { CommandCenter } from './command-center';
+import { SystemDiagnostics } from './system-diagnostics';
 import { Card, CardContent } from '../ui/card';
 
-type AdminTab = 'users' | 'settings' | 'command';
+type AdminTab = 'users' | 'settings' | 'command' | 'diagnostics';
 
 export function AdminPanel() {
   const [activeTab, setActiveTab] = useState<AdminTab>('users');
@@ -67,17 +68,30 @@ export function AdminPanel() {
           User Management
         </button>
         {clientIP && (
-          <button
-            type="button"
-            className={`px-4 py-2 font-medium text-sm ${
-              activeTab === 'command'
-                ? 'text-[#f5f5f5] border-b-2 border-[#ff2d55]'
-                : 'text-[#a3a3a3] hover:text-[#e0e0e0]'
-            }`}
-            onClick={() => setActiveTab('command')}
-          >
-            Command Center
-          </button>
+          <>
+            <button
+              type="button"
+              className={`px-4 py-2 font-medium text-sm ${
+                activeTab === 'diagnostics'
+                  ? 'text-[#f5f5f5] border-b-2 border-blue-500'
+                  : 'text-[#a3a3a3] hover:text-[#e0e0e0]'
+              }`}
+              onClick={() => setActiveTab('diagnostics')}
+            >
+              System Diagnostics
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 font-medium text-sm ${
+                activeTab === 'command'
+                  ? 'text-[#f5f5f5] border-b-2 border-[#ff2d55]'
+                  : 'text-[#a3a3a3] hover:text-[#e0e0e0]'
+              }`}
+              onClick={() => setActiveTab('command')}
+            >
+              Command Center
+            </button>
+          </>
         )}
       </div>
       
@@ -85,6 +99,7 @@ export function AdminPanel() {
       <Card variant="bordered" className="overflow-hidden">
         <CardContent className="p-0">
           {activeTab === 'users' && <UserManagement />}
+          {activeTab === 'diagnostics' && <SystemDiagnostics clientIP={clientIP ?? ''} />}
           {activeTab === 'command' && <CommandCenter clientIP={clientIP ?? ''} />}
         </CardContent>
       </Card>

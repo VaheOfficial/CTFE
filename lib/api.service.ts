@@ -258,4 +258,151 @@ export class ApiService {
         }
         return response.json();
     }
+
+    async getRadioChannels() {
+        const response = await this.request('/audio/', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to get radio channels',
+            }
+        }
+        return response.json();
+    }
+
+    async playRadioChannel() {
+        const response = await this.request('/audio/play', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            }
+        });
+        
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to play radio channel',
+            }
+        }
+
+        // Check if this is a streaming response (audio content)
+        const contentType = response.headers.get('content-type');
+        if (contentType?.includes('audio/')) {
+            // This is the actual audio stream, return the URL directly
+            return {
+                success: true,
+                data: {
+                    url: `${this.baseUrl}/audio/play`,
+                    name: 'Mission Control',
+                    frequency: '121.5'
+                }
+            };
+        }
+
+        // Otherwise, it's metadata about the stream
+        try {
+            const data = await response.json();
+            return {
+                success: true,
+                data: data
+            };
+        } catch {
+            // If JSON parsing fails, assume it's a stream and return URL
+            return {
+                success: true,
+                data: {
+                    url: `${this.baseUrl}/audio/play`,
+                    name: 'Mission Control',
+                    frequency: '121.5'
+                }
+            };
+        }
+    }
+
+    async getAudioStreamUrl() {
+        // Direct method to get stream URL without triggering server-side logic
+        // This is better for streaming audio as it doesn't wait for any response
+        return {
+            success: true,
+            data: {
+                url: `${this.baseUrl}/audio/stream`,
+                name: 'Mission Control',
+                frequency: '121.5'
+            }
+        };
+    }
+
+    async getVideoSources() {
+        const response = await this.request('/video/', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to get video sources',
+            }
+        }
+        return response.json();
+    }
+
+    async getVideoPreviews() {
+        const response = await this.request('/video/previews/', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.data.message || 'Failed to get video previews',
+            }
+        }
+        return response.json();
+    }
+
+    async streamVideo(name: string) {
+        // Return the stream URL - let the video element handle the actual streaming
+        const streamUrl = `${this.baseUrl}/video/stream/${name}`;
+        
+        return {
+            success: true,
+            data: {
+                url: streamUrl
+            }
+        };
+    }
+
+    // System diagnostic tool - for network testing
+    async runSystemDiagnostic(command: string, target: string) {
+        const response = await this.request('/admin/diagnostic', {
+            method: 'POST',
+            body: JSON.stringify({ command, target }),
+            headers: {
+                'Authorization': `Bearer ${Cookies.get(mcToken)}`,
+            },
+        });
+        
+        if(!response.ok) {
+            const errorData = await response.json();
+            return {
+                success: false,
+                message: errorData.error || 'Failed to run system diagnostic',
+                data: null
+            }
+        }
+        return response.json();
+    }
 }

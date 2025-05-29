@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { getInitials, getAvatarColor } from '../../lib/avatar-utils';
 import { cn } from '../../lib/utils';
 
@@ -41,9 +42,11 @@ export function Avatar({
         )}
       >
         {src ? (
-          <img
+          <Image
             src={src}
             alt={`${name}'s avatar`}
+            width={100}
+            height={100}
             className="w-full h-full object-cover"
           />
         ) : (

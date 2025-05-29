@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../redux/store';
 import { UnauthorizedAction } from '../components/unauthorized-action';
-import { toast } from 'sonner';
 
 // Higher order component to protect routes
 export function withAuth<P extends object>(
@@ -22,7 +21,6 @@ export function withAuth<P extends object>(
     const { requireAdmin = false, redirectTo = '/login' } = options || {};
     
     const isAdmin = userRole === 'admin';
-    const hasRequiredPermissions = requireAdmin ? isAdmin : true;
     
     useEffect(() => {
       // If not authenticated, redirect to login page

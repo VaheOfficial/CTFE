@@ -4,23 +4,27 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { useEffect, useState, useCallback } from 'react';
 import { ApiService } from '@/lib/api.service';
-import { LaunchCountdown } from './launch-countdown';
 import { CountdownTimer } from './countdown-timer';
+
+interface LaunchData {
+  id: string;
+  name: string;
+  date: string;
+  status: string;
+}
 
 interface DashboardHeaderProps {
   launchpadName: string;
   launchpadLocation: string;
   activeStatus: 'active' | 'inactive' | 'maintenance' | 'launch-ready';
-  nextLaunchTime?: string;
 }
 
 export function DashboardHeader({
   launchpadName,
   launchpadLocation,
   activeStatus,
-  nextLaunchTime,
 }: DashboardHeaderProps) {
-  const [nextLaunch, setNextLaunch] = useState<any>(null);
+  const [nextLaunch, setNextLaunch] = useState<LaunchData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchLaunches = useCallback(async () => {

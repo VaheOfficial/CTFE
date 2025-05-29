@@ -82,8 +82,6 @@ export function CommandCenter({ clientIP }: CommandCenterProps) {
       
       checkAndCreateGlobalState();
     }
-  // Remove the dependencies that might cause unnecessary re-renders
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthorized, clientIP, isCheckingGlobalState, user?._id, user?.name]);
 
   const handleArm = () => {

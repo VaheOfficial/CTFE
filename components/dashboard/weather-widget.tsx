@@ -63,7 +63,7 @@ export function WeatherWidget() {
         clearTimeout(timeoutId);
       }
     };
-  }, []);
+  }, [dispatch]);
 
   function temperaturePreference() {
     if(user?.temperaturePreference === 'c') {
@@ -208,11 +208,11 @@ export function WeatherWidget() {
   };
 
   return (
-    <Card variant="bordered" className="overflow-hidden">
+    <Card variant="bordered" className="overflow-hidden h-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 py-4 px-5 border-b border-[#1a1a1a]">
         <CardTitle className="text-sm font-medium text-[#f5f5f5]">Weather Conditions</CardTitle>
         <div className="text-xs text-[#666666] font-mono">
-          {weatherData?.updatedAt}
+          {new Date(weatherData?.updatedAt || 0).toLocaleString()}
         </div>
       </CardHeader>
       <CardContent className="px-5 py-4">
@@ -222,36 +222,36 @@ export function WeatherWidget() {
             <div className="flex flex-row w-full justify-between space-x-2">
               <div className="flex flex-col items-start space-x-2">
                 <div className="text-2xl font-medium text-[#f5f5f5]">
-                  {temperaturePreference()}°C
+                  {temperaturePreference()}°{user?.temperaturePreference === 'c' ? 'C' : 'F'}
                 </div>
                 <div className="capitalize text-xs text-[#a3a3a3] mt-0.5">
                   {weatherData?.condition}
                 </div>
               </div>
               <div className="flex items-start space-x-2">
-                <button className={`text-xs border rounded-md px-2 py-1 hover:border-gray-500 transition-all ${user?.temperaturePreference === 'c' ? 'bg-[#2a2a2a] text-white border-[#3a3a3a]' : 'text-[#a3a3a3] border-gray-600'}`} onClick={() => setTemperaturePreferenceLocal('c')}>°C</button>
-                <button className={`text-xs border rounded-md px-2 py-1 hover:border-gray-500 transition-all ${user?.temperaturePreference === 'f' ? 'bg-[#2a2a2a] text-white border-[#3a3a3a]' : 'text-[#a3a3a3] border-gray-600'}`} onClick={() => setTemperaturePreferenceLocal('f')}>°F</button>
+                <button type="button" className={`text-xs border rounded-md px-2 py-1 hover:border-gray-500 transition-all ${user?.temperaturePreference === 'c' ? 'bg-[#2a2a2a] text-white border-[#3a3a3a]' : 'text-[#a3a3a3] border-gray-600'}`} onClick={() => setTemperaturePreferenceLocal('c')}>°C</button>
+                <button type="button" className={`text-xs border rounded-md px-2 py-1 hover:border-gray-500 transition-all ${user?.temperaturePreference === 'f' ? 'bg-[#2a2a2a] text-white border-[#3a3a3a]' : 'text-[#a3a3a3] border-gray-600'}`} onClick={() => setTemperaturePreferenceLocal('f')}>°F</button>
               </div>
             </div>
           </div>
           
           <div className="grid grid-cols-2 gap-2.5">
-            <div className="flex justify-between p-3 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
+            <div className="flex justify-between p-6 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
               <span className="text-xs text-[#a3a3a3]">Humidity</span>
               <span className="text-xs font-medium text-[#f5f5f5]">{weatherData?.humidity}%</span>
             </div>
             
-            <div className="flex justify-between p-3 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
+            <div className="flex justify-between p-6 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
               <span className="text-xs text-[#a3a3a3]">Pressure</span>
               <span className="text-xs font-medium text-[#f5f5f5]">{weatherData?.pressure} hPa</span>
             </div>
             
-            <div className="flex justify-between p-3 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
+            <div className="flex justify-between p-6 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
               <span className="text-xs text-[#a3a3a3]">Wind Speed</span>
               <span className="text-xs font-medium text-[#f5f5f5]">{weatherData?.windSpeed} km/h</span>
             </div>
             
-            <div className="flex justify-between items-center p-3 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
+            <div className="flex justify-between items-center p-6 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
               <span className="text-xs text-[#a3a3a3]">Wind Direction</span>
               <div className="flex items-center">
                 <span className="text-xs font-medium text-[#f5f5f5] mr-1.5">{weatherData?.windDirection ? weatherData.windDirection.slice(-2) : 'N/A'}</span>
@@ -259,14 +259,14 @@ export function WeatherWidget() {
               </div>
             </div>
 
-            <div className="flex justify-between p-3 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
-              <span className="text-xs text-[#a3a3a3]">Altitude</span>
-              <span className="text-xs font-medium text-[#f5f5f5]">{weatherData?.altitude} m</span>
+            <div className="flex justify-between p-6 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
+              <span className="text-xs text-[#a3a3a3]">Last Updated</span>
+              <span className="text-xs font-medium text-[#f5f5f5]">{new Date(weatherData?.updatedAt || 0).toLocaleString().split(',')[1].split(':')[0]}:{new Date(weatherData?.updatedAt || 0).toLocaleString().split(',')[1].split(':')[1]}</span>
             </div>
 
-            <div className="flex justify-between p-3 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
+            <div className="flex justify-between p-6 bg-[#0a0a0a] rounded-md border border-[#1a1a1a] hover:border-[#252525] transition-all">
               <span className="text-xs text-[#a3a3a3]">Wind Chill</span>
-              <span className="text-xs font-medium text-[#f5f5f5]">{weatherData?.windChill} °C</span>
+              <span className="text-xs font-medium text-[#f5f5f5]">{user?.temperaturePreference === 'c' ? `${weatherData?.windChill || 0} °C` : `${((weatherData?.windChill || 0) * 9/5 + 32).toFixed(1)} °F`}</span>
             </div>
 
           </div>

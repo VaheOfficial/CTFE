@@ -20,33 +20,6 @@ type User = {
   id?: string; // Add this to be compatible with the modal's type
 };
 
-// Function to generate a strong password
-const generateStrongPassword = () => {
-  const uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-  const lowercase = 'abcdefghijkmnopqrstuvwxyz';
-  const numbers = '23456789';
-  const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-  
-  let password = '';
-  
-  // Ensure at least one of each character type
-  password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
-  password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
-  password += numbers.charAt(Math.floor(Math.random() * numbers.length));
-  password += symbols.charAt(Math.floor(Math.random() * symbols.length));
-  
-  // Add additional random characters to reach desired length (12-16 chars)
-  const length = Math.floor(Math.random() * 5) + 12; // Length between 12-16
-  const allChars = uppercase + lowercase + numbers + symbols;
-  
-  for (let i = password.length; i < length; i++) {
-    password += allChars.charAt(Math.floor(Math.random() * allChars.length));
-  }
-  
-  // Shuffle the password
-  return password.split('').sort(() => 0.5 - Math.random()).join('');
-};
-
 export function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
